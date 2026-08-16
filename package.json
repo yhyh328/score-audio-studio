@@ -1,19 +1,21 @@
 {
   "name": "score-audio-studio",
   "version": "1.0.0",
-  "description": "",
+  "description": "Music score domain models, validation, and playback-oriented tooling.",
   "main": "index.js",
   "scripts": {
     "test": "vitest run",
+    "test:evidence": "node tools/generate-test-evidence.mjs",
     "build": "tsc --build",
-    "typecheck": "tsc --build",
+    "typecheck": "tsc --build && tsc --project packages/score-domain/tsconfig.test.json",
     "test:watch": "vitest",
-    "clean": "npm run clean --workspaces --if-present"
+    "clean": "npm run clean --workspaces --if-present",
+    "clean:evidence": "node tools/clean-test-evidence.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "private": true,
   "engines": {
     "node": ">=24.18.0 <25"
