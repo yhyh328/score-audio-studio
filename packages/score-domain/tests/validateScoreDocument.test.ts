@@ -9,15 +9,15 @@ function createScore(overrides: Partial<ScoreDocument> = {}): ScoreDocument {
     ppq: DEFAULT_PPQ,
     tempoMap: [{ tick: 0, bpm: 120 }],
     parts: [{
-      id: crypto.randomUUID(),
+      id: `part-${crypto.randomUUID()}`,
       name: "Piano",
       measures: [{
-        id: crypto.randomUUID(),
+        id: `measure-${crypto.randomUUID()}`,
         number: 1,
         timeSignature: { numerator: 4, denominator: 4 },
         events: [{
           type: "note",
-          id: crypto.randomUUID(),
+          id: `event-${crypto.randomUUID()}`,
           offsetTicks: 0,
           durationTicks: DEFAULT_PPQ,
           pitches: [{ step: "C", alter: 0, octave: 4 }],
@@ -111,10 +111,10 @@ describe("validateScoreDocument", () => {
     const firstPart = score.parts[0];
     if (firstPart === undefined) throw new Error("Test fixture part is missing.");
     score.parts.push({
-      id: crypto.randomUUID(),
+      id: `part-${crypto.randomUUID()}`,
       name: firstPart.name,
       measures: [{
-        id: crypto.randomUUID(),
+        id: `measure-${crypto.randomUUID()}`,
         number: 1,
         timeSignature: { numerator: 4, denominator: 4 },
         events: [],

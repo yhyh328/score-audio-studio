@@ -12,7 +12,12 @@ function validate(
   measureLengthTicks: number | undefined = MEASURE_LENGTH_TICKS,
   usedEntityIds = new Set<EntityId>(),
 ) {
-  return validateScoreEvents(events, measureLengthTicks, PATH, usedEntityIds);
+  return validateScoreEvents(
+    events, 
+    measureLengthTicks, 
+    PATH, 
+    usedEntityIds
+  );
 }
 
 describe("validateScoreEvents", () => {
@@ -20,14 +25,14 @@ describe("validateScoreEvents", () => {
     expect(validate([])).toEqual([]);
     expect(validate([{
       type: "rest",
-      id: crypto.randomUUID(),
+      id: `event-${crypto.randomUUID()}`,
       offsetTicks: 0,
       durationTicks: MEASURE_LENGTH_TICKS,
     }])).toEqual([]);
   });
 
   it("rejects duplicate entity IDs", () => {
-    const duplicatedId = crypto.randomUUID();
+    const duplicatedId = `event-${crypto.randomUUID()}`;
     const usedEntityIds = new Set<EntityId>([duplicatedId]);
     const result = validate([{
       type: "rest",
@@ -50,7 +55,7 @@ describe("validateScoreEvents", () => {
   ] as const)("rejects invalid %s value %s", (field, value, code) => {
     const event: ScoreEvent = {
       type: "rest",
-      id: crypto.randomUUID(),
+      id: `event-${crypto.randomUUID()}`,
       offsetTicks: 0,
       durationTicks: DEFAULT_PPQ,
       [field]: value,
@@ -65,7 +70,7 @@ describe("validateScoreEvents", () => {
   it("rejects an event that extends beyond its measure", () => {
     const result = validate([{
       type: "rest",
-      id: crypto.randomUUID(),
+      id: `event-${crypto.randomUUID()}`,
       offsetTicks: 1800,
       durationTicks: 121,
     }]);
@@ -79,7 +84,7 @@ describe("validateScoreEvents", () => {
   it("skips only the measure-boundary check when the length is unavailable", () => {
     const result = validate([{
       type: "rest",
-      id: crypto.randomUUID(),
+      id: `event-${crypto.randomUUID()}`,
       offsetTicks: -1,
       durationTicks: 5000,
     }], undefined);
@@ -93,7 +98,7 @@ describe("validateScoreEvents", () => {
   it("delegates note pitch and velocity validation", () => {
     const result = validate([{
       type: "note",
-      id: crypto.randomUUID(),
+      id: `event-${crypto.randomUUID()}`,
       offsetTicks: 0,
       durationTicks: DEFAULT_PPQ,
       pitches: [],

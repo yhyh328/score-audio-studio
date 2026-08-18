@@ -12,10 +12,10 @@ function createProject(): ProjectDocument {
       ppq: DEFAULT_PPQ,
       tempoMap: [{ tick: 0, bpm: 120 }],
       parts: [{
-        id: crypto.randomUUID(),
+        id: `part-${crypto.randomUUID()}`,
         name: "Piano",
         measures: [{
-          id: crypto.randomUUID(),
+          id: `measure-${crypto.randomUUID()}`,
           number: 1,
           timeSignature: { numerator: 4, denominator: 4 },
           events: [],

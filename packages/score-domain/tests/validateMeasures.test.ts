@@ -10,7 +10,7 @@ const PATH = "measures";
 
 function createMeasure(overrides: Partial<Measure> = {}): Measure {
   return {
-    id: crypto.randomUUID(),
+    id: `measure-${crypto.randomUUID()}`,
     number: 1,
     timeSignature: { numerator: 4, denominator: 4 },
     events: [],
@@ -26,7 +26,10 @@ describe("validateMeasures", () => {
   it("accepts unique measures sorted by ascending number", () => {
     const result = validate([
       createMeasure(),
-      createMeasure({ id: crypto.randomUUID(), number: 2 }),
+      createMeasure({ 
+        id: `measure-${crypto.randomUUID()}`, 
+        number: 2 
+      }),
     ]);
 
     expect(result).toEqual([]);
@@ -42,7 +45,7 @@ describe("validateMeasures", () => {
   });
 
   it("rejects a duplicate entity ID", () => {
-    const duplicatedId = crypto.randomUUID();
+    const duplicatedId = `measure-${crypto.randomUUID()}`;
     const result = validate([
       createMeasure({ id: duplicatedId }),
       createMeasure({ id: duplicatedId, number: 2 }),
@@ -78,7 +81,9 @@ describe("validateMeasures", () => {
   it("rejects a duplicate measure number", () => {
     const result = validate([
       createMeasure(),
-      createMeasure({ id: crypto.randomUUID() }),
+      createMeasure({ 
+        id: `measure-${crypto.randomUUID()}` 
+      }),
     ]);
 
     expect(result).toContainEqual(
@@ -93,7 +98,10 @@ describe("validateMeasures", () => {
   it("rejects measures that are not sorted by ascending number", () => {
     const result = validate([
       createMeasure({ number: 2 }),
-      createMeasure({ id: crypto.randomUUID(), number: 1 }),
+      createMeasure({ 
+        id: `measure-${crypto.randomUUID()}`, 
+        number: 1 
+      }),
     ]);
 
     expect(result).toContainEqual(
@@ -114,7 +122,7 @@ describe("validateMeasures", () => {
         timeSignature: invalidTimeSignature,
         events: [{
           type: "rest",
-          id: crypto.randomUUID(),
+          id: `event-${crypto.randomUUID()}`,
           offsetTicks: -1,
           durationTicks: 0,
         }],
