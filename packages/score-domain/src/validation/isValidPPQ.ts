@@ -58,8 +58,6 @@
 
 const MAX_PPQ = 0x7fff;
 
-export const DEFAULT_PPQ = 480;
-
 export function isValidPPQ(ppq: number): boolean {
     return (Number.isSafeInteger(ppq) // check if the ppq is a safe integer
         &&  ppq > 0               // check if the ppq is positive

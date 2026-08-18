@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ScoreDocument } from "../src/model/score";
-import { DEFAULT_PPQ } from "../src/validation/isValidPPQ";
+import { DEFAULT_PPQ } from "../src/model/score";
 import { validateScoreDocument } from "../src/validation/validateScoreDocument";
 
 function createScore(overrides: Partial<ScoreDocument> = {}): ScoreDocument {

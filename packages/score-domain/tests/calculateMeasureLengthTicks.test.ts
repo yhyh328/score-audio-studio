@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calculateMeasureLengthTicks } from "../src/conversion/calculateMeasureLengthTicks";
-import { DEFAULT_PPQ } from "../src/validation/isValidPPQ";
+import { DEFAULT_PPQ } from "../src/model/score";
 
 describe("calculateMeasureLengthTicks", () => {
   it.each([
