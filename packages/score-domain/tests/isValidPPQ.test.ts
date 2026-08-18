@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_PPQ, validatePPQ } from "../src/validation/validatePPQ";
+import { DEFAULT_PPQ, isValidPPQ } from "../src/validation/isValidPPQ";
 
-describe("validatePPQ", () => {
+describe("isValidPPQ", () => {
   it.each([1, DEFAULT_PPQ, 481, 0x7fff])("accepts PPQ %s", (ppq) => {
-    expect(validatePPQ(ppq)).toBe(true);
+    expect(isValidPPQ(ppq)).toBe(true);
   });
 
   it.each([
@@ -15,6 +15,6 @@ describe("validatePPQ", () => {
     Number.POSITIVE_INFINITY,
     Number.MAX_SAFE_INTEGER + 1,
   ])("rejects PPQ %s", (ppq) => {
-    expect(validatePPQ(ppq)).toBe(false);
+    expect(isValidPPQ(ppq)).toBe(false);
   });
 });

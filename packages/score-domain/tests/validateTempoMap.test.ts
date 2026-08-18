@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TempoEvent } from "../src/model/tempo";
-import { DEFAULT_PPQ } from "../src/validation/validatePPQ";
+import { DEFAULT_PPQ } from "../src/validation/isValidPPQ";
 import { validateTempoEvent } from "../src/validation/validateTempoEvent";
 import { validateTempoMap } from "../src/validation/validateTempoMap";
 

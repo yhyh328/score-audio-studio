@@ -3,7 +3,7 @@ import type { EntityId } from "../src/model/entityId";
 import type { Measure } from "../src/model/measure";
 import type { TimeSignature } from "../src/model/timeSignature";
 import { validateMeasures } from "../src/validation/validateMeasures";
-import { DEFAULT_PPQ } from "../src/validation/validatePPQ";
+import { DEFAULT_PPQ } from "../src/validation/isValidPPQ";
 
 const PPQ = DEFAULT_PPQ;
 const PATH = "measures";

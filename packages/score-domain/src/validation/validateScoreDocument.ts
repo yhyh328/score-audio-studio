@@ -1,6 +1,6 @@
 import type { ScoreDocument } from "../model/score";
 import { validateParts } from "./validateParts";
-import { validatePPQ } from "./validatePPQ";
+import { isValidPPQ } from "./isValidPPQ";
 import { isValidSchemaVersion } from "./validateSchemaVersion";
 import { validateTempoMap } from "./validateTempoMap";
 import type { ValidationIssue, ValidationResult } from "./validationTypes";
@@ -25,7 +25,7 @@ export function validateScoreDocument(
   }
 
   const ppq = score.ppq;
-  const hasValidPPQ = validatePPQ(ppq);
+  const hasValidPPQ = isValidPPQ(ppq);
   if (!hasValidPPQ) {
     issues.push({
       target: "ppq",
