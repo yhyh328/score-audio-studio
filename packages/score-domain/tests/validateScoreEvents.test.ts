@@ -105,9 +105,15 @@ describe("validateScoreEvents", () => {
       intensity: { dynamic: "mf", velocity: 0 },
     }]);
 
-    expect(result.map(({ code }) => code)).toEqual(expect.arrayContaining([
-      "MISSING_PITCH",
-      "INVALID_VELOCITY",
-    ]));
+    expect(result).toContainEqual(expect.objectContaining({
+      code: "MISSING_PITCH",
+      path: `${PATH}[0].pitches`,
+    }));
+
+    expect(result).toContainEqual(expect.objectContaining({
+      code: "INVALID_VELOCITY",
+      path: `${PATH}[0].intensity.velocity`,
+    }));
+
   });
 });

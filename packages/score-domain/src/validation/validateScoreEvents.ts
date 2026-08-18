@@ -55,7 +55,7 @@ export function validateScoreEvents(
             });
             hasValidDuration = false;
         }
-        if (hasValidOffset && hasValidDuration && 
+        if (hasValidOffset && hasValidDuration &&
             measureLengthTicks !== undefined &&
             offsetTicks + durationTicks > measureLengthTicks) {
             issues.push({
@@ -70,7 +70,7 @@ export function validateScoreEvents(
             const pitches: Pitch[] = event.pitches;
             issues.push(...validatePitches(pitches, `${eventPath}.pitches`));
             const intensity: Intensity = event.intensity;
-            issues.push(...validateIntensity(intensity, `${eventPath}`))
+            issues.push(...validateIntensity(intensity, `${eventPath}.intensity`))
         }
     }
     return issues;
