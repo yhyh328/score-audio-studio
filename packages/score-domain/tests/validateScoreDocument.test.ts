@@ -98,7 +98,7 @@ describe("validateScoreDocument", () => {
 
     const result = validateScoreDocument(score);
 
-    expect(result.issues.filter(({ code }) => code === "DUPLICATED_ENTITY_ID"))
+    expect(result.issues.filter(({ code }) => code === "DUPLICATE_ENTITY_ID"))
       .toHaveLength(2);
     expect(result.issues.map(({ path }) => path)).toEqual(expect.arrayContaining([
       "parts[0].measures[0].id",

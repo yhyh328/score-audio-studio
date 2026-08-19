@@ -83,7 +83,7 @@ describe("validateTempoMap", () => {
 
     expect(validateTempoMap(tempoMap, PATH)).toContainEqual(
       expect.objectContaining({
-        code: "DUPLICATED_TEMPO_TICK",
+        code: "DUPLICATE_TEMPO_TICK",
         path: `${PATH}[3].tick`,
       }),
     );

@@ -40,7 +40,7 @@ export function validateTempoMap(
         issues.push({
           target: "tempo",
           severity: "error",
-          code: "DUPLICATED_TEMPO_TICK",
+          code: "DUPLICATE_TEMPO_TICK",
           message: `Tempo map contains duplicate tick ${tick}.`,
           path: `${path}[${index}].tick`,
         });

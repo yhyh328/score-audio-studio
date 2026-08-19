@@ -42,7 +42,7 @@ describe("validateScoreEvents", () => {
     }], MEASURE_LENGTH_TICKS, usedEntityIds);
 
     expect(result).toContainEqual(expect.objectContaining({
-      code: "DUPLICATED_ENTITY_ID",
+      code: "DUPLICATE_ENTITY_ID",
       path: `${PATH}[0].id`,
     }));
   });

@@ -53,7 +53,7 @@ describe("validateMeasures", () => {
 
     expect(result).toContainEqual(
       expect.objectContaining({
-        code: "DUPLICATED_ENTITY_ID",
+        code: "DUPLICATE_ENTITY_ID",
         message: `Entity ID must be unique: ${duplicatedId}`,
         path: `${PATH}[1].id`,
       }),
@@ -88,7 +88,7 @@ describe("validateMeasures", () => {
 
     expect(result).toContainEqual(
       expect.objectContaining({
-        code: "DUPLICATED_MEASURE_NUMBER",
+        code: "DUPLICATE_MEASURE_NUMBER",
         message: "Measure number must be unique: 1",
         path: `${PATH}[1].number`,
       }),

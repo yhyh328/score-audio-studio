@@ -13,7 +13,7 @@ export function entityIdIssue(
   return {
     target: "entityId",
     severity: "error",
-    code: "DUPLICATED_ENTITY_ID",
+    code: "DUPLICATE_ENTITY_ID",
     message: `Entity ID must be unique: ${id}`,
     path: `${path}.id`,
   }

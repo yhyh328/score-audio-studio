@@ -52,7 +52,7 @@ export function validateMeasures(
             issues.push({
                 target: "measure",
                 severity: "error",
-                code: "DUPLICATED_MEASURE_NUMBER",
+                code: "DUPLICATE_MEASURE_NUMBER",
                 message: `Measure number must be unique: ${number}`,
                 path: `${measurePath}.number`,
             });
