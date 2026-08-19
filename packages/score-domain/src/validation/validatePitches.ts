@@ -1,5 +1,6 @@
 import type { Pitch } from "../model/pitch";
 import { pitchToMidiNoteNumber } from "../conversion/pitchToMidiNoteNumber";
+import { isNonNegativeInteger } from "./numberPredicates";
 import type { ValidationIssue } from "./validationTypes";
 
 /**
@@ -11,13 +12,9 @@ import type { ValidationIssue } from "./validationTypes";
  * - MIDI note number 127: G9
  */
 function isValidPitch(pitch: Pitch): boolean {
-    try {
-        pitchToMidiNoteNumber(pitch);
-        return true;
-    } catch (error) {
-        if (error instanceof RangeError) return false;
-        throw error;
-    }
+    const midiNoteNumber = pitchToMidiNoteNumber(pitch);
+    return isNonNegativeInteger(midiNoteNumber)
+        && midiNoteNumber <= 127;
 }
 
 export function validatePitches(
