@@ -1,5 +1,5 @@
 import type { TempoEvent } from "../model/tempo";
-import { isPositiveInteger } from "./numberPredicates";
+import { isNonNegativeInteger } from "./numberPredicates";
 import type { ValidationIssue } from "./validationTypes";
 /**
  * These are pragmatic bounds for rejecting implausible input, not limits imposed by music theory or the score format. 
@@ -15,12 +15,12 @@ export function validateTempoEvent(
   const issues: ValidationIssue[] = [];
 
   const tick = tempo.tick;
-  if (!isPositiveInteger(tick)) {
+  if (!isNonNegativeInteger(tick)) {
     issues.push({
       target: "tempo",
       severity: "error",
       code: "INVALID_TEMPO_TICK",
-      message: `Tempo tick must be a positive integer: ${tick}`,
+      message: `Tempo tick must be a non-negative integer: ${tick}`,
       path: `${path}.tick`,
     });
   }
