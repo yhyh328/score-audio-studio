@@ -28,7 +28,7 @@ The linked Notion documents are currently maintained primarily in Korean. Englis
 - [Architecture overview — Korean](https://app.notion.com/p/3a14b2f5a3b0818eb209f90e79bc229e)
 - [Phase design index — Korean](https://app.notion.com/p/3c04b2f5a3b0801189c5df2121310ab0)
 - [Phase 1 detailed design: Score Domain — Korean](https://app.notion.com/p/3c04b2f5a3b0819fb288c444e32d0edb)
-- [Phase 1 test evidence](docs/test-evidence/test-evidence-20260825-204553.md)
+- [Phase 1 test evidence](docs/test-evidence/test-evidence-20260825-205047.md)
 
 ## Requirements
 
