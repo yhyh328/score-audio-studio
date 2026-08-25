@@ -1,6 +1,7 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/score-domain" }
+    { "path": "./packages/score-domain" },
+    { "path": "./packages/playback-compiler" }
   ]
 }
