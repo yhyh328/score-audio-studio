@@ -18,7 +18,7 @@ function usage() {
 
 Options:
   -o, --output FILE  Markdown output path.
-                     Default: docs/test-evidence/test-evidence-<KST timestamp>.md
+                     Default: docs/test-evidence/test-evidence-<JST timestamp>.md
   -f, --force        Overwrite evidence files with the same name.
   -h, --help         Show this help.
 
@@ -70,9 +70,9 @@ function parseArguments(arguments_) {
   };
 }
 
-function formatKoreanTimestamp(date = new Date()) {
+function formatJapanTimestamp(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Seoul",
+    timeZone: "Asia/Tokyo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -86,7 +86,7 @@ function formatKoreanTimestamp(date = new Date()) {
 }
 
 function createRunId(date = new Date()) {
-  return formatKoreanTimestamp(date).replace(/[-:]/g, "").replace("T", "-").slice(0, 15);
+  return formatJapanTimestamp(date).replace(/[-:]/g, "").replace("T", "-").slice(0, 15);
 }
 
 function run(command, arguments_, options = {}) {
@@ -280,7 +280,7 @@ function renderEvidence(context) {
   lines.push("# Automated Test Results and Evidence", "");
   lines.push(`- Evidence ID: \`TEST-${code(runId)}\``);
   lines.push(`- Overall result: **${overall}**`);
-  lines.push(`- Generated at: ${code(completedAt)} (Asia/Seoul)`, "");
+  lines.push(`- Generated at: ${code(completedAt)} (Asia/Tokyo)`, "");
   lines.push("## 1. Test Overview", "");
   lines.push("| Item | Details |", "| --- | --- |");
   lines.push("| Test objective | Run the registered Vitest test cases and verify that their expected results are satisfied. |");
@@ -435,8 +435,8 @@ async function main() {
     outputPath,
     jsonPath,
     logPath,
-    startedAt: formatKoreanTimestamp(startedDate),
-    completedAt: formatKoreanTimestamp(completedDate),
+    startedAt: formatJapanTimestamp(startedDate),
+    completedAt: formatJapanTimestamp(completedDate),
     durationSeconds: Math.max(0, Math.round((completedDate - startedDate) / 1000)),
     exitCode,
     commandDisplay,
