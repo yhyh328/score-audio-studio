@@ -1,0 +1,5 @@
+
+> score-audio-studio@1.0.0 test
+> vitest run --reporter=json --outputFile=/home/yhyh328/score-audio-studio/docs/test-evidence/test-evidence-20260825-194318.json
+
+JSON report written to /home/yhyh328/score-audio-studio/docs/test-evidence/test-evidence-20260825-194318.json
