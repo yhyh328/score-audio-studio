@@ -4,7 +4,7 @@
  */
 export type Dynamic = "ppp" | "pp" | "p" | "mp"| "mf" | "f" | "ff" | "fff" 			
 						
-export type DynamicVelocityMap = Record<Dynamic, number>;						
+type DynamicVelocityMap = Record<Dynamic, number>;						
 						
 export const DEFAULT_DYNAMIC_VELOCITY_MAP: 						
 	Readonly<DynamicVelocityMap> = {					
