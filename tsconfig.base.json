@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ES2025", // Emit JavaScript using the ES2025 language baseline, matching the project's modern Node.js runtime assumptions.
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "lib": ["ES2022"],
+    "lib": ["ES2025"], // Type-check ES2025 standard library APIs such as Array.prototype.toSorted.
     "types": [],
     "strict": true,
     "noUncheckedIndexedAccess": true,
