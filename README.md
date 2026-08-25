@@ -1,14 +1,12 @@
 # Score Audio Studio
 
-Score Audio Studio is a music-software portfolio project built around an internal score model. The score model is the source of truth; formats such as MIDI and MusicXML will be handled by adapters instead of defining the domain model.
+Score Audio Studio is a music-software portfolio project built around an internal score model. The score model is the source of truth; formats such as MIDI and MusicXML are treated as adapters instead of defining the domain model.
 
 ## Current status
 
-The Phase 1 — Score Domain implementation baseline is complete on the `phase-1-score-domain` branch.
+Phase 1 — Score Domain is complete. Phase 2 — Playback Compiler is now in progress on the `phase-2-playback-compiler` branch.
 
-The current Phase 1 code passes the verification baseline and reflects the current validation and public-API decisions. It provides the domain foundation for the Phase 2 playback compiler.
-
-The current scope includes:
+Phase 1 delivered:
 
 - `ProjectDocument` and `ScoreDocument`
 - parts, measures, time signatures, note events, and rest events
@@ -16,19 +14,49 @@ The current scope includes:
 - PPQ-based integer timing
 - pitch-to-MIDI-note-number conversion
 - document, tempo-map, entity-ID, measure, event, pitch, and intensity validation
-- unit and boundary tests for the implemented Phase 1 behavior
+- unit and boundary tests for the public Phase 1 behavior
 - reproducible Markdown test-evidence generation
 
-The Phase 2 playback compiler is outside this branch. Synthesizers, effects, transport, and AudioWorklet integration belong to later phases.
+The verified Phase 1 result is recorded in [the Phase 1 test evidence](docs/test-evidence/test-evidence-20260825-205047.md).
 
-## Design documentation
+## Phase 2 — Playback Compiler
 
-The linked Notion documents are currently maintained primarily in Korean. English versions will be provided later for international reviewers.
+Status: work in progress. No Phase 2 playback-compiler implementation has been committed yet.
 
-- [Architecture overview — Korean](https://app.notion.com/p/3a14b2f5a3b0818eb209f90e79bc229e)
-- [Phase design index — Korean](https://app.notion.com/p/3c04b2f5a3b0801189c5df2121310ab0)
-- [Phase 1 detailed design: Score Domain — Korean](https://app.notion.com/p/3c04b2f5a3b0819fb288c444e32d0edb)
-- [Phase 1 test evidence](docs/test-evidence/test-evidence-20260825-205047.md)
+The goal of Phase 2 is to transform a validated `ScoreDocument` into a deterministic, playback-oriented representation without coupling the score domain to a synthesizer, DSP engine, or the Web Audio API.
+
+Planned responsibilities:
+
+- consume a validated `ScoreDocument`
+- derive absolute score positions from measures and measure-local event offsets
+- derive playback context such as part identity without storing playback-only fields in the score domain
+- expand note and chord information into an ordered playback timeline
+- merge playback events from multiple parts
+- produce deterministic ordering for events that share the same score position
+- interpret the global tempo map when converting ticks into playback time
+- convert score ticks into seconds and, later, sample positions
+- report validation or compilation failures without introducing module-global mutable state
+
+The exact public output types will be introduced together with their tests instead of being fixed in the README before implementation.
+
+Phase 2 completion requires:
+
+- a dedicated `playback-compiler` package and public entry point
+- tick compilation and tempo-conversion tests, including boundary cases
+- note, chord, rest, multi-measure, and multi-part compilation tests
+- deterministic ordering tests
+- TypeScript, unit-test, and build verification
+- updated architecture documentation and reproducible Phase 2 evidence
+
+The following remain outside Phase 2:
+
+- synthesizers, samplers, and SoundFont playback
+- General MIDI instrument assignment and program changes
+- DSP effects and effect chains
+- AudioWorklet integration
+- transport and score-editor user interfaces
+- MIDI and MusicXML import or export adapters
+- raw untrusted-data decoding
 
 ## Requirements
 
@@ -59,63 +87,86 @@ npm run test:evidence
 
 Generated reports are written under `docs/test-evidence/`. Remove them with `npm run clean:evidence` when they are no longer needed.
 
-## Score-domain design
+## Input contract
 
-The Phase 1 ownership hierarchy is:
+The playback compiler consumes a validated `ScoreDocument` from the `score-domain` package.
+
+The relevant input hierarchy is:
 
 ```text
-ProjectDocument
-└── ScoreDocument
-    ├── TempoEvent[]
-    └── Part[]
-        └── Measure[]
-            └── ScoreEvent[]
-                ├── NoteEvent
-                │   ├── Pitch[]
-                │   └── Intensity
-                └── RestEvent
+ScoreDocument
+├── TempoEvent[]
+└── Part[]
+    └── Measure[]
+        └── ScoreEvent[]
+            ├── NoteEvent
+            │   ├── Pitch[]
+            │   └── Intensity
+            └── RestEvent
 ```
 
-The current Phase 1 validation policy is:
+The compiler relies on Score Domain validation rather than re-implementing those rules.
 
-* schema version `1` for the current project and score formats
-* PPQ from `1` through `32767`
-* a non-empty tempo map beginning at tick `0`, with unique ascending ticks
-* integer BPM values from `20` through `300`
-* globally unique entity IDs within one score-validation run
-* positive integer measure numbers that are unique within each part and stored in ascending order
-* MIDI note numbers from `0` (`C-1`) through `127` (`G9`)
-* note velocity overrides from `1` through `127`
+In particular, it assumes that:
 
-Validation is stateless between calls. An unsupported schema version is fatal; other independent checks continue where their required inputs remain valid.
+- PPQ is valid
+- the tempo map begins at tick `0` and is validly ordered
+- measure numbers and measure ordering are valid within each part
+- event offsets and durations are valid
+- note pitches are valid
+- velocity overrides are valid
+- entity IDs satisfy the Score Domain validation contract
 
-`pitchToMidiNoteNumber()` remains a pure domain conversion. Invalid pitch data is handled by validation rather than by throwing from the conversion function.
+The compiler derives playback-specific information such as absolute ticks, part context, event ordering, and timing data without adding those fields back into the Score Domain model.
 
-### Public API policy
-
-Package-root exports are intentionally kept minimal.
-
-Internal domain types and utilities are exposed through the package root only when there is a concrete external or cross-package use case for them. Additional public exports can be added later as those dependencies appear.
-
-## Repository structure
+## Expected package structure
 
 ```text
-score-audio-studio/
-├── apps/                       # Future application packages
-├── packages/
-│   └── score-domain/
-│       ├── src/
-│       │   ├── conversion/
-│       │   ├── model/
-│       │   └── validation/
-│       └── tests/
-├── tools/                      # Test-evidence utilities
+packages/playback-compiler/
+├── src/
+│   ├── model/
+│   │   └── playbackEvent.ts
+│   ├── compiler/
+│   │   └── compileScoreToTicks.ts
+│   ├── sorting/
+│   │   └── sortTickPlaybackEvents.ts
+│   ├── timing/
+│   │   ├── buildTempoSegments.ts
+│   │   ├── tickToSeconds.ts
+│   │   └── tickToSamplePosition.ts
+│   └── index.ts
+├── tests/
 ├── package.json
-├── tsconfig.base.json
-├── tsconfig.json
-└── vitest.config.ts
+└── tsconfig.json
 ```
 
-## Current boundary
+This structure represents the current Phase 2 design and may be refined as implementation and tests are introduced. Files should be split only when a concrete responsibility or test boundary justifies the separation.
 
-The TypeScript validators operate on already decoded domain values. A future adapter or decoding layer must validate the raw shape of untrusted JSON, MIDI, or MusicXML before treating it as a domain document.
+## Phase 2 boundary
+
+The playback compiler transforms validated score-domain data into deterministic playback-oriented data.
+
+It is responsible for:
+
+- converting measure-local event offsets into global score ticks
+- expanding note and chord data into playback events
+- ignoring rests as sound-producing events while preserving their timing effect through measure structure
+- merging events from multiple parts
+- deterministic event ordering
+- resolving tempo-aware playback time
+- converting ticks into seconds and, later, sample positions
+
+It is not responsible for:
+
+- synthesizers or samplers
+- SoundFont or General MIDI instrument playback
+- DSP effects
+- AudioWorklet integration
+- transport state
+- score-editor UI
+- MIDI or MusicXML import/export
+- raw JSON, MIDI, or MusicXML shape decoding
+
+A future adapter or decoding layer must validate raw untrusted data before treating it as a `ScoreDocument`.
+
+The playback compiler schedules musical data but does not generate audio.
