@@ -1,4 +1,3 @@
-cat > README.md <<'EOF'
 # Score Audio Studio
 
 Score Audio Studio is a music-software portfolio project for representing musical scores as structured domain data, compiling them into playback events, and eventually connecting them to synthesis, DSP, and interactive score editing.
@@ -139,4 +138,3 @@ The linked design documents are currently maintained primarily in Korean.
 - `phase-2-playback-compiler` — Phase 2 development
 
 Completed phases are integrated into `main`, and each new phase starts from the latest stable `main`.
-EOF
