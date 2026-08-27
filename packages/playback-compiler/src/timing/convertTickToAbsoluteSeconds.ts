@@ -1,20 +1,13 @@
 import type { TempoSegment } from "../model/tempoSegment";						
+import { ticksToSeconds } from "./ticksToSeconds";
 						
-function calculateSeconds(						
-	tick: number,					
-	bpm: number,					
-	ppq: number					
-) {						
-	return tick / ppq * 60 / bpm;					
-}						
-						
-export function convertTickToAbsoluteSeconds(						
+export function convertTickToAbsoluteSeconds(
 	ppq: number,					
 	tick: number,					
 	segments: TempoSegment[],					
 	scoreEndTick: number					
 ): number {						
-	for (const segment of segments) {					
+	for (const segment of segments) {
 		const { 				
 			startTick, 			
 			endTick, 			
@@ -22,8 +15,8 @@ export function convertTickToAbsoluteSeconds(
 			startSeconds 			
 		} = segment;				
 		if (endTick) {				
-			if (startTick <= tick && tick <= endTick) {			
-				return startSeconds + calculateSeconds(		
+			if (startTick <= tick && tick <= endTick) {
+				return startSeconds + ticksToSeconds(
 						tick - startTick,
 					   	bpm,
 					   	ppq
@@ -32,7 +25,7 @@ export function convertTickToAbsoluteSeconds(
 		} else {				
 			if (startTick <= tick &&			
 				tick <= scoreEndTick) {		
-				return startSeconds + calculateSeconds(		
+				return startSeconds + ticksToSeconds(
 						tick - startTick,
 					   	bpm,
 					   	ppq
