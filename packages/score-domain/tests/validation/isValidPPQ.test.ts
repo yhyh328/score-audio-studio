@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_PPQ } from "../src/model/score";
-import { isValidPPQ } from "../src/validation/isValidPPQ";
+import { DEFAULT_PPQ } from "../../src/model/score";
+import { isValidPPQ } from "../../src/validation/isValidPPQ";
 
 describe("isValidPPQ", () => {
   it.each([1, DEFAULT_PPQ, 481, 0x7fff])("accepts PPQ %s", (ppq) => {
