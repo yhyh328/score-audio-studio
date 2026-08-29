@@ -29,9 +29,8 @@ describe("validateTimeSignature", () => {
         3, 
         4, 
         5, 
-        100, 
-        1000, 
-        Number.MAX_SAFE_INTEGER
+        29,
+        30 // max time signature numerator is 30.
     ]);
     it.each(validTimeSignatures)(
         "accepts time signature: $numerator/$denominator",
@@ -46,9 +45,12 @@ describe("validateTimeSignature", () => {
         0, 
         -1, 
         0.5, 
+        31,
+        100,
+        1000,
         Number.NaN, 
         Number.POSITIVE_INFINITY, 
-        Number.MAX_SAFE_INTEGER + 1,
+        Number.MAX_SAFE_INTEGER,
         Number.MAX_VALUE
     ]);
     it.each(invalidTimeSignatures)(
