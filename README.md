@@ -8,6 +8,10 @@ The Phase 1 — Score Domain implementation baseline is complete on the `phase-1
 
 The current Phase 1 code passes the verification baseline and reflects the current validation and public-API decisions. It provides the domain foundation for the Phase 2 playback compiler.
 
+During Phase 2 development, follow-up Phase 1 validation constraints
+were added for cross-part time-signature consistency and the supported
+time-signature numerator range.
+
 The current scope includes:
 
 - `ProjectDocument` and `ScoreDocument`
@@ -28,7 +32,7 @@ The linked Notion documents are currently maintained primarily in Korean. Englis
 - [Architecture overview — Korean](https://app.notion.com/p/3a14b2f5a3b0818eb209f90e79bc229e)
 - [Phase design index — Korean](https://app.notion.com/p/3c04b2f5a3b0801189c5df2121310ab0)
 - [Phase 1 detailed design: Score Domain — Korean](https://app.notion.com/p/3c04b2f5a3b0819fb288c444e32d0edb)
-- [Phase 1 test evidence](docs/test-evidence/test-evidence-20260825-205047.md)
+- [Original Phase 1 verification evidence — 246 tests](docs/test-evidence/test-evidence-20260825-205047.md)
 
 ## Requirements
 
@@ -86,6 +90,8 @@ The current Phase 1 validation policy is:
 * positive integer measure numbers that are unique within each part and stored in ascending order
 * MIDI note numbers from `0` (`C-1`) through `127` (`G9`)
 * note velocity overrides from `1` through `127`
+* time-signature numerators from `1` through `30`, with denominators limited to `1`, `2`, `4`, `8`, and `16`
+* corresponding measures across parts must use the same time signature; explicit polymeter support is outside the current phase
 
 Validation is stateless between calls. An unsupported schema version is fatal; other independent checks continue where their required inputs remain valid.
 
