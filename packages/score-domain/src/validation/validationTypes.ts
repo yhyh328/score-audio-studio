@@ -23,7 +23,8 @@ export type ValidationErrorCode =
   | "EVENT_EXCEEDS_MEASURE"
   | "MISSING_PITCH"
   | "INVALID_VELOCITY"
-  | "INVALID_PITCH";
+  | "INVALID_PITCH"
+  | "INCONSISTENT_TIME_SIGNATURE";
 
 export type ValidationTarget =
   | "entityId"
