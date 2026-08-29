@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   isNonNegativeInteger,
   isPositiveInteger,
-} from "../src/validation/numberPredicates";
+} from "../../src/validation/numberPredicates";
 
 describe("number predicates", () => {
   describe("isNonNegativeInteger", () => {

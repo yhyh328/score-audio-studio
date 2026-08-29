@@ -17,11 +17,11 @@ Phase 1 delivered:
 - unit and boundary tests for the public Phase 1 behavior
 - reproducible Markdown test-evidence generation
 
-The verified Phase 1 result is recorded in [the Phase 1 test evidence](docs/test-evidence/test-evidence-20260825-205047.md).
+The updated Phase 1 result is recorded in [the Phase 1 test evidence](docs/test-evidence/test-evidence-20260830-025415.md): 257 tests passed from a clean working tree.
 
 ## Phase 2 — Playback Compiler
 
-Status: work in progress. No Phase 2 playback-compiler implementation has been committed yet.
+Status: work in progress. Tick compilation and tempo-aware timing primitives are under active development.
 
 The goal of Phase 2 is to transform a validated `ScoreDocument` into a deterministic, playback-oriented representation without coupling the score domain to a synthesizer, DSP engine, or the Web Audio API.
 
@@ -112,6 +112,8 @@ In particular, it assumes that:
 - PPQ is valid
 - the tempo map begins at tick `0` and is validly ordered
 - measure numbers and measure ordering are valid within each part
+- time-signature numerators are between `1` and `30`
+- corresponding measures across parts use the same time signature
 - event offsets and durations are valid
 - note pitches are valid
 - velocity overrides are valid
@@ -127,11 +129,11 @@ packages/playback-compiler/
 │   ├── model/
 │   │   └── playbackEvent.ts
 │   ├── compiler/
-│   │   └── compileScoreToTicks.ts
-│   ├── sorting/
+│   │   ├── compileScoreToTicks.ts
 │   │   └── sortTickPlaybackEvents.ts
 │   ├── timing/
 │   │   ├── buildTempoSegments.ts
+│   │   ├── convertTickToAbsoluteSeconds.ts
 │   │   ├── tickToSeconds.ts
 │   │   └── tickToSamplePosition.ts
 │   └── index.ts
