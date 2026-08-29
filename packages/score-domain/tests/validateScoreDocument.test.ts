@@ -123,4 +123,25 @@ describe("validateScoreDocument", () => {
 
     expect(validateScoreDocument(score)).toEqual({ valid: true, issues: [] });
   });
+
+  it ("rejects different time signatures for the same measure across parts", () => {
+    const score = createScore({})
+    score.parts.push({
+      id: `part-${crypto.randomUUID()}`,
+      name: " Guitar",
+      measures: [{
+        id: `measure-${crypto.randomUUID()}`,
+        number: 1,
+        timeSignature: { numerator: 5, denominator: 4 },
+        events: [{
+          type: "note",
+          id: `event-${crypto.randomUUID()}`,
+          offsetTicks: 0,
+          durationTicks: DEFAULT_PPQ,
+          pitches: [{ step: "D", alter: 0, octave: 4 }],
+          intensity: { dynamic: "mf" },
+        }],
+      }]
+    })
+  })
 });
