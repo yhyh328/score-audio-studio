@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { ScoreDocument } from "../src/model/score";
-import { DEFAULT_PPQ } from "../src/model/score";
-import { validateScoreDocument } from "../src/validation/validateScoreDocument";
+import type { ScoreDocument } from "../../src/model/score";
+import { DEFAULT_PPQ } from "../../src/model/score";
+import { validateScoreDocument } from "../../src/validation/validateScoreDocument";
 
 function createScore(overrides: Partial<ScoreDocument> = {}): ScoreDocument {
   return {
@@ -123,4 +123,25 @@ describe("validateScoreDocument", () => {
 
     expect(validateScoreDocument(score)).toEqual({ valid: true, issues: [] });
   });
+
+  it ("rejects different time signatures for the same measure across parts", () => {
+    const score = createScore({})
+    score.parts.push({
+      id: `part-${crypto.randomUUID()}`,
+      name: " Guitar",
+      measures: [{
+        id: `measure-${crypto.randomUUID()}`,
+        number: 1,
+        timeSignature: { numerator: 5, denominator: 4 },
+        events: [{
+          type: "note",
+          id: `event-${crypto.randomUUID()}`,
+          offsetTicks: 0,
+          durationTicks: DEFAULT_PPQ,
+          pitches: [{ step: "D", alter: 0, octave: 4 }],
+          intensity: { dynamic: "mf" },
+        }],
+      }]
+    })
+  })
 });

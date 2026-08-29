@@ -113,15 +113,15 @@ The Playback Compiler package will be developed as the Phase 2 implementation pr
 
 Phase 1 final verification:
 
-- Evidence ID: `TEST-20260825-205047`
+- Evidence ID: `TEST-20260830-025415`
 - Result: PASS
 - Test files: 13 / 13
-- Test cases: 246 / 246
+- Test cases: 257 / 257
 - Working tree: clean
 - Environment: Node.js 24.18.0 / npm 11.16.0
 - Time zone: Asia/Tokyo
 
-[View Phase 1 test evidence](docs/test-evidence/test-evidence-20260825-205047.md)
+[View Phase 1 test evidence](docs/test-evidence/test-evidence-20260830-025415.md)
 
 ## Design documentation
 

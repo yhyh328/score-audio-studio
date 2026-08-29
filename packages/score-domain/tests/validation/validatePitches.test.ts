@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Pitch } from "../src/model/pitch";
-import { validatePitches } from "../src/validation/validatePitches";
+import type { Pitch } from "../../src/model/pitch";
+import { validatePitches } from "../../src/validation/validatePitches";
 
 const PATH = "parts[0].measures[0].events[0].pitches";
 

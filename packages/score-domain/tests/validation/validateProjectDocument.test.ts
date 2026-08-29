@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { ProjectDocument } from "../src/model/project";
-import { DEFAULT_PPQ } from "../src/model/score";
-import { validateProjectDocument } from "../src/validation/validateProjectDocument";
+import type { ProjectDocument } from "../../src/model/project";
+import { DEFAULT_PPQ } from "../../src/model/score";
+import { validateProjectDocument } from "../../src/validation/validateProjectDocument";
 
 function createProject(): ProjectDocument {
   return {

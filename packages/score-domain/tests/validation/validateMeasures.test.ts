@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { EntityId } from "../src/model/entityId";
-import type { Measure } from "../src/model/measure";
-import type { TimeSignature } from "../src/model/timeSignature";
-import { validateMeasures } from "../src/validation/validateMeasures";
-import { DEFAULT_PPQ } from "../src/model/score";
+import type { EntityId } from "../../src/model/entityId";
+import type { Measure } from "../../src/model/measure";
+import type { TimeSignature } from "../../src/model/timeSignature";
+import { validateMeasures } from "../../src/validation/validateMeasures";
+import { DEFAULT_PPQ } from "../../src/model/score";
 
 const PPQ = DEFAULT_PPQ;
 const PATH = "measures";

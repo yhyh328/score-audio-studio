@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pitchToMidiNoteNumber } from "../src/conversion/pitchToMidiNoteNumber";
+import { pitchToMidiNoteNumber } from "../../src/conversion/pitchToMidiNoteNumber";
 
 describe("pitchToMidiNoteNumber", () => {
   it.each([

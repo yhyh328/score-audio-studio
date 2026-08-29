@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { EntityId } from "../src/model/entityId";
-import type { ScoreEvent } from "../src/model/scoreEvent";
-import { DEFAULT_PPQ } from "../src/model/score";
-import { validateScoreEvents } from "../src/validation/validateScoreEvents";
+import type { EntityId } from "../../src/model/entityId";
+import type { ScoreEvent } from "../../src/model/scoreEvent";
+import { DEFAULT_PPQ } from "../../src/model/score";
+import { validateScoreEvents } from "../../src/validation/validateScoreEvents";
 
 const PATH = "parts[0].measures[0].events";
 const MEASURE_LENGTH_TICKS = DEFAULT_PPQ * 4;
