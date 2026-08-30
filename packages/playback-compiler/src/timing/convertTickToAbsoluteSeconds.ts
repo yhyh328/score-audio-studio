@@ -33,5 +33,11 @@ export function convertTickToAbsoluteSeconds(
 			}			
 		}				
 	}					
-	return -1 // something went wrong					
-}						
+	/**
+	 * Phase 1 validation and buildTempoSegments guarantee
+	 * that every playback tick is covered by a tempo segment.
+	 * Reaching this point indicates an internal invariant violation. */
+	throw new Error(
+		`Invariant violation: no tempo segment covers tick ${tick}.`,
+	);
+}
