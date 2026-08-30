@@ -75,4 +75,25 @@ describe("convertTickToAbsoluteSeconds", () => {
         scoreEndTick
       )).toBeCloseTo(expected, 8); // Compare up to 8 decimal places
   });
+  /**
+	 * Phase 1 validation and buildTempoSegments guarantee
+	 * that every playback tick is covered by a tempo segment.
+	 * Reaching this point indicates an internal invariant violation. */
+  it.each([
+    -1,
+    -42,
+    -0.5,
+    Number.NaN,
+    Number.POSITIVE_INFINITY,
+    Number.MAX_SAFE_INTEGER + 1,
+  ])("throws for an uncovered tick: %i", (invalidTick) => {
+    expect(() => convertTickToAbsoluteSeconds(
+      ppq,
+      invalidTick,
+      tempoSegments,
+      scoreEndTick
+    )).toThrow(
+      `Invariant violation: no tempo segment covers tick ${invalidTick}.`
+    );
+  })
 });
