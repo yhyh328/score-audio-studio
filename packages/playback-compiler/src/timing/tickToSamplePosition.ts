@@ -1,4 +1,8 @@
 import type { TickPlaybackEvent } from "../model/playbackEvent";
+import {
+    isNonNegativeInteger,
+    isPositiveInteger
+} from "../utils/numberPredicates";
 import type { TempoSegment } from "../model/tempoSegment";
 import { 
     convertTickToAbsoluteSeconds 
@@ -7,11 +11,9 @@ import {
 /**
  * Converts an event tick to the nearest discrete sample-frame position.
  *
- * The result uses bigint to represent sample positions as integer frame
- * indices consistently with SamplePlaybackEvent.
- *
- * The intermediate calculation uses number and is precise only while the
- * rounded sample position remains within Number's safe integer range.
+ * Returns a non-negative safe integer sample index.
+ * Throws if sampleRate is not a positive safe integer 
+ * or if the resulting sample position cannot be represented as a safe integer.
  */
 
 export function tickToSamplePosition(
@@ -20,13 +22,19 @@ export function tickToSamplePosition(
     ppq: number,
     segments: TempoSegment[],
     scoreEndTick: number,
-): bigint {
+): number {
+    if (!isPositiveInteger(sampleRate)) {
+        throw new Error("Sample rate must be a positive safe integer");
+    }
     const seconds = convertTickToAbsoluteSeconds(
         ppq,
         event.tick,
         segments,
         scoreEndTick,
     );
-
-    return BigInt(Math.round(seconds * sampleRate));
+    const samplePosition = Math.round(seconds * sampleRate);
+    if (!isNonNegativeInteger(samplePosition)) {
+        throw new Error("Sample position must be a non-negative safe integer");
+    }
+    return samplePosition;
 }
