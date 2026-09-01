@@ -7,7 +7,7 @@
     "test": "vitest run",
     "test:evidence": "node tools/generate-test-evidence.mjs",
     "build": "tsc --build",
-    "typecheck": "tsc --build && tsc --project packages/score-domain/tsconfig.test.json",
+    "typecheck": "tsc --build && tsc --project packages/score-domain/tsconfig.test.json && tsc --project packages/playback-compiler/tsconfig.test.json",
     "test:watch": "vitest",
     "clean": "npm run clean --workspaces --if-present",
     "clean:evidence": "node tools/clean-test-evidence.mjs"
