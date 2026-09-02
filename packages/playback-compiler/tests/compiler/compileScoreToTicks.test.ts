@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ScoreDocument } from "@score-audio-studio/score-domain";
 import { compileScoreToTicks } from "../../src/compiler/compileScoreToTicks";
+import type { TickPlaybackEvent } from "../../src/model/playbackEvent";
 
 function createScore(): ScoreDocument {
   return {
@@ -21,6 +22,23 @@ function createScore(): ScoreDocument {
       }],
     }],
   };
+}
+
+function eventSummaries(
+  events: readonly TickPlaybackEvent[],
+  parts: ScoreDocument["parts"],
+) {
+  const partNameById = new Map(
+    parts.map(({ id, name }) => [id, name]),
+  );
+
+  return events.map((event) => ({
+    type: event.type,
+    tick: event.tick,
+    partName: partNameById.get(event.partId),
+    midiNote: event.midiNote,
+    velocity: event.velocity,
+  }));
 }
 
 describe("compileScoreToTicks", () => {
@@ -69,12 +87,32 @@ describe("compileScoreToTicks", () => {
         pitches: [{ step: "C", alter: 0, octave: 4 }],
         intensity: { dynamic: "mf" },
       });
+      score.parts[0]?.measures.push({
+        id: `measure-${crypto.randomUUID()}`,
+        number: 2,
+        timeSignature: { numerator: 4, denominator: 4 },
+        events: [
+          {
+            type: "note",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 500,
+            durationTicks: 1000,
+            pitches: [{ step: "D", alter: 0, octave: 4 }],
+            intensity: { dynamic: "mf" },
+          },
+        ],
+      });
       const result = compileScoreToTicks(score);
       if (!result.success) {
         throw new Error(JSON.stringify(result.validation, null, 2))
       }
-      expect(result.events).toHaveLength(2);
-      expect(result.scoreEndTick).toBe(4000);
+      expect(eventSummaries(result.events, score.parts)).toEqual([
+        { type: "noteOn", tick: 0, partName: "Piano", midiNote: 60, velocity: 72 },
+        { type: "noteOff", tick: 1000, partName: "Piano", midiNote: 60, velocity: 0 },
+        { type: "noteOn", tick: 4500, partName: "Piano", midiNote: 62, velocity: 72 },
+        { type: "noteOff", tick: 5500, partName: "Piano", midiNote: 62, velocity: 0 },
+      ]);
+      expect(result.scoreEndTick).toBe(8000);
     }
   );
 
@@ -90,13 +128,59 @@ describe("compileScoreToTicks", () => {
       if (!result.success) {
         throw new Error(JSON.stringify(result.validation, null, 2))
       }
-      /**
-       * Each pitch generates one noteOn event and noteOff event.
-       * Therefore, the number of playback events is twice the total number of pitches.
-       * This fixture contains 14 pitches, so it produces 28 playback events.
-       */
-      expect(result.events).toHaveLength(28);
-      expect(result.scoreEndTick).toBe(4000);
+      expect(eventSummaries(result.events, score.parts)).toEqual([
+        { type: "noteOn", tick: 0, partName: "Cello", midiNote: 48, velocity: 104 },
+        { type: "noteOn", tick: 0, partName: "Viola", midiNote: 60, velocity: 44 },
+        { type: "noteOn", tick: 0, partName: "Piano", midiNote: 60, velocity: 72 },
+        { type: "noteOn", tick: 0, partName: "Piano", midiNote: 64, velocity: 72 },
+        { type: "noteOn", tick: 0, partName: "Piano", midiNote: 67, velocity: 72 },
+        { type: "noteOn", tick: 0, partName: "1st Violin", midiNote: 76, velocity: 88 },
+        { type: "noteOff", tick: 1000, partName: "Cello", midiNote: 48, velocity: 0 },
+        { type: "noteOff", tick: 1000, partName: "1st Violin", midiNote: 76, velocity: 0 },
+        { type: "noteOn", tick: 1000, partName: "2nd Violin", midiNote: 71, velocity: 58 },
+        { type: "noteOff", tick: 2000, partName: "Viola", midiNote: 60, velocity: 0 },
+        { type: "noteOff", tick: 2000, partName: "Piano", midiNote: 60, velocity: 0 },
+        { type: "noteOff", tick: 2000, partName: "Piano", midiNote: 64, velocity: 0 },
+        { type: "noteOff", tick: 2000, partName: "Piano", midiNote: 67, velocity: 0 },
+        { type: "noteOff", tick: 2000, partName: "2nd Violin", midiNote: 71, velocity: 0 },
+        { type: "noteOn", tick: 2000, partName: "Cello", midiNote: 43, velocity: 58 },
+        { type: "noteOn", tick: 2000, partName: "Viola", midiNote: 62, velocity: 72 },
+        { type: "noteOn", tick: 2000, partName: "Viola", midiNote: 69, velocity: 72 },
+        { type: "noteOn", tick: 2000, partName: "2nd Violin", midiNote: 74, velocity: 88 },
+        { type: "noteOn", tick: 2000, partName: "1st Violin", midiNote: 79, velocity: 72 },
+        { type: "noteOn", tick: 3000, partName: "Piano", midiNote: 62, velocity: 88 },
+        { type: "noteOn", tick: 3000, partName: "Piano", midiNote: 66, velocity: 88 },
+        { type: "noteOff", tick: 4000, partName: "Cello", midiNote: 43, velocity: 0 },
+        { type: "noteOff", tick: 4000, partName: "Viola", midiNote: 62, velocity: 0 },
+        { type: "noteOff", tick: 4000, partName: "Piano", midiNote: 62, velocity: 0 },
+        { type: "noteOff", tick: 4000, partName: "Piano", midiNote: 66, velocity: 0 },
+        { type: "noteOff", tick: 4000, partName: "Viola", midiNote: 69, velocity: 0 },
+        { type: "noteOff", tick: 4000, partName: "2nd Violin", midiNote: 74, velocity: 0 },
+        { type: "noteOff", tick: 4000, partName: "1st Violin", midiNote: 79, velocity: 0 },
+        { type: "noteOn", tick: 4000, partName: "Cello", midiNote: 50, velocity: 58 },
+        { type: "noteOn", tick: 4000, partName: "Viola", midiNote: 60, velocity: 44 },
+        { type: "noteOn", tick: 4000, partName: "Piano", midiNote: 62, velocity: 72 },
+        { type: "noteOn", tick: 4000, partName: "Piano", midiNote: 66, velocity: 72 },
+        { type: "noteOn", tick: 4000, partName: "Piano", midiNote: 69, velocity: 72 },
+        { type: "noteOn", tick: 4000, partName: "2nd Violin", midiNote: 76, velocity: 58 },
+        { type: "noteOn", tick: 4000, partName: "1st Violin", midiNote: 81, velocity: 88 },
+        { type: "noteOff", tick: 5000, partName: "Viola", midiNote: 60, velocity: 0 },
+        { type: "noteOff", tick: 5000, partName: "1st Violin", midiNote: 81, velocity: 0 },
+        { type: "noteOn", tick: 5000, partName: "1st Violin", midiNote: 83, velocity: 72 },
+        { type: "noteOff", tick: 6000, partName: "Piano", midiNote: 62, velocity: 0 },
+        { type: "noteOff", tick: 6000, partName: "Piano", midiNote: 66, velocity: 0 },
+        { type: "noteOff", tick: 6000, partName: "Piano", midiNote: 69, velocity: 0 },
+        { type: "noteOff", tick: 6000, partName: "2nd Violin", midiNote: 76, velocity: 0 },
+        { type: "noteOff", tick: 6000, partName: "1st Violin", midiNote: 83, velocity: 0 },
+        { type: "noteOn", tick: 6000, partName: "Viola", midiNote: 62, velocity: 72 },
+        { type: "noteOn", tick: 6000, partName: "2nd Violin", midiNote: 78, velocity: 88 },
+        { type: "noteOn", tick: 6000, partName: "1st Violin", midiNote: 81, velocity: 72 },
+        { type: "noteOff", tick: 7000, partName: "Cello", midiNote: 50, velocity: 0 },
+        { type: "noteOff", tick: 7000, partName: "Viola", midiNote: 62, velocity: 0 },
+        { type: "noteOff", tick: 7000, partName: "2nd Violin", midiNote: 78, velocity: 0 },
+        { type: "noteOff", tick: 7000, partName: "1st Violin", midiNote: 81, velocity: 0 },
+      ]);
+      expect(result.scoreEndTick).toBe(7000);
     }
   );
 
@@ -139,6 +223,42 @@ function createParts(): ScoreDocument["parts"] {
             intensity: { dynamic: "mf" },
           },
         ],
+      }, {
+        id: `measure-${crypto.randomUUID()}`,
+        number: 2,
+        timeSignature: { numerator: 3, denominator: 4 },
+        events: [
+          {
+            type: "note",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 0,
+            durationTicks: 1000,
+            pitches: [
+              { step: "A", alter: 0, octave: 5 },
+            ],
+            intensity: { dynamic: "f" },
+          },
+          {
+            type: "note",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 1000,
+            durationTicks: 1000,
+            pitches: [
+              { step: "B", alter: 0, octave: 5 },
+            ],
+            intensity: { dynamic: "mf" },
+          },
+          {
+            type: "note",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 2000,
+            durationTicks: 1000,
+            pitches: [
+              { step: "A", alter: 0, octave: 5 },
+            ],
+            intensity: { dynamic: "mf" },
+          },
+        ],
       }],
     },
 
@@ -177,6 +297,32 @@ function createParts(): ScoreDocument["parts"] {
             intensity: { dynamic: "f" },
           },
         ],
+      }, {
+        id: `measure-${crypto.randomUUID()}`,
+        number: 2,
+        timeSignature: { numerator: 3, denominator: 4 },
+        events: [
+          {
+            type: "note",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 0,
+            durationTicks: 2000,
+            pitches: [
+              { step: "E", alter: 0, octave: 5 },
+            ],
+            intensity: { dynamic: "mp" },
+          },
+          {
+            type: "note",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 2000,
+            durationTicks: 1000,
+            pitches: [
+              { step: "F", alter: 1, octave: 5 },
+            ],
+            intensity: { dynamic: "f" },
+          },
+        ],
       }],
     },
 
@@ -206,6 +352,38 @@ function createParts(): ScoreDocument["parts"] {
             pitches: [
               { step: "D", alter: 0, octave: 4 },
               { step: "A", alter: 0, octave: 4 },
+            ],
+            intensity: { dynamic: "mf" },
+          },
+        ],
+      }, {
+        id: `measure-${crypto.randomUUID()}`,
+        number: 2,
+        timeSignature: { numerator: 3, denominator: 4 },
+        events: [
+          {
+            type: "note",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 0,
+            durationTicks: 1000,
+            pitches: [
+              { step: "C", alter: 0, octave: 4 },
+            ],
+            intensity: { dynamic: "p" },
+          },
+          {
+            type: "rest",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 1000,
+            durationTicks: 1000,
+          },
+          {
+            type: "note",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 2000,
+            durationTicks: 1000,
+            pitches: [
+              { step: "D", alter: 0, octave: 4 },
             ],
             intensity: { dynamic: "mf" },
           },
@@ -244,6 +422,22 @@ function createParts(): ScoreDocument["parts"] {
             durationTicks: 2000,
             pitches: [
               { step: "G", alter: 0, octave: 2 },
+            ],
+            intensity: { dynamic: "mp" },
+          },
+        ],
+      }, {
+        id: `measure-${crypto.randomUUID()}`,
+        number: 2,
+        timeSignature: { numerator: 3, denominator: 4 },
+        events: [
+          {
+            type: "note",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 0,
+            durationTicks: 3000,
+            pitches: [
+              { step: "D", alter: 0, octave: 3 },
             ],
             intensity: { dynamic: "mp" },
           },
@@ -287,6 +481,30 @@ function createParts(): ScoreDocument["parts"] {
               { step: "F", alter: 1, octave: 4 },
             ],
             intensity: { dynamic: "f" },
+          },
+        ],
+      }, {
+        id: `measure-${crypto.randomUUID()}`,
+        number: 2,
+        timeSignature: { numerator: 3, denominator: 4 },
+        events: [
+          {
+            type: "note",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 0,
+            durationTicks: 2000,
+            pitches: [
+              { step: "D", alter: 0, octave: 4 },
+              { step: "F", alter: 1, octave: 4 },
+              { step: "A", alter: 0, octave: 4 },
+            ],
+            intensity: { dynamic: "mf" },
+          },
+          {
+            type: "rest",
+            id: `event-${crypto.randomUUID()}`,
+            offsetTicks: 2000,
+            durationTicks: 1000,
           },
         ],
       }],
