@@ -34,7 +34,7 @@ export function tickToSamplePosition(
     );
     const samplePosition = Math.round(seconds * sampleRate);
     if (!isNonNegativeInteger(samplePosition)) {
-        throw new Error("Sample position must be a non-negative safe integer");
+        throw new Error(`Sample position exceeds safe positive integer range: ${samplePosition}`);
     }
     return samplePosition;
 }
