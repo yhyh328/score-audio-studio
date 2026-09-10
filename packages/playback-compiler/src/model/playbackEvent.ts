@@ -8,11 +8,3 @@ export interface TickPlaybackEvent {
     midiNote: number;
     velocity: number; // 0 -> noteOff
 }
-
-export interface SecondsPlaybackEvent extends TickPlaybackEvent {
-    seconds: number;
-}
-
-export interface SamplePlaybackEvent extends TickPlaybackEvent {
-    samplePosition: bigint;
-}
