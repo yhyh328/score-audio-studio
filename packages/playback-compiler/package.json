@@ -1,5 +1,5 @@
 {
-  "name": "@score-audio-studio/score-domain",
+  "name": "@score-audio-studio/playback-compiler",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,6 +12,9 @@
     }
   },
   "files": ["dist"],
+  "dependencies": {
+    "@score-audio-studio/score-domain": "0.1.0"
+  },
   "scripts": {
     "build": "tsc --build",
     "typecheck": "tsc --build",
