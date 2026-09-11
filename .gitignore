@@ -12,11 +12,9 @@ coverage/
 *.tmp.*
 tmp/
 .tmp/
-*tmp*build/
+*tmp*
 cmake-build-*/
 CMakeFiles/
 CMakeCache.txt
 compile_commands.json
-
-# CMake build output
 /build/
