@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <cstdint>
-#include <numbers>
 #include <array>
 
 namespace score_audio_studio::dsp {
@@ -18,25 +17,29 @@ class Oscillator {
 
 public:
     void prepare(
-        double sampleRate,
-        WaveType type = WaveType::Sine,
-        std::uint8_t numHarmonics = 1
+        const double sampleRate
     ) noexcept;
     void setFrequency(
-        std::uint8_t midiNoteNumber
+        const std::uint8_t midiNoteNumber
+    ) noexcept;
+    void setWaveType(
+        const WaveType type = WaveType::Sine,
+        const std::uint8_t numHarmonics = 1
     ) noexcept;
     double renderSample() noexcept;
+    void reset() noexcept;
 
 private:
     static constexpr std::uint8_t kMaxHarmsNum_ = 64;
     
     void calcHarmonicAmps() noexcept;
+    void wrapPhase() noexcept;
     
     WaveType type_{WaveType::Sine};
    
-    double sampleRate_;
-    double frequency_;
-    double phase_;
+    double sampleRate_{0.0 / 0.0};
+    double frequency_{0.0 / 0.0};
+    double phase_{0.0};
   
     std::array<double, kMaxHarmsNum_> harmonicAmps_;
     

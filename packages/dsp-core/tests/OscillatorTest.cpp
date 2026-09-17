@@ -11,7 +11,8 @@ int main()
 
     Oscillator osc;
 
-    osc.prepare(sampleRate); // Sine wave
+    osc.prepare(sampleRate);
+    osc.setWaveType(); // Sine wave
     osc.setFrequency(72); // C5 is converted to 523.25... Hz
     
     std::cout << "Rendering samples..." << std::endl;
@@ -26,4 +27,6 @@ int main()
         );
     }
     std::cout << std::endl;
+
+    osc.reset();
 }

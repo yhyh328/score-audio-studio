@@ -1,23 +1,24 @@
 #include <algorithm>
 #include <cassert>
-#include <cmath>
-#include <cstdint>
 #include <numbers>
-#include <vector>
 
 #include "score_audio_studio/dsp/Oscillator.hpp"
 
 namespace score_audio_studio::dsp {
 
 void Oscillator::prepare(
-    double sampleRate,
-    WaveType type,
-    std::uint8_t numHarmonics
+    const double sampleRate
 ) noexcept
 {
     assert(0 < sampleRate &&std::isfinite(sampleRate));
     sampleRate_ = sampleRate;
+}  // Oscillator::prepare
 
+void Oscillator::setWaveType(
+    const WaveType type,
+    const std::uint8_t numHarmonics
+) noexcept
+{
     // if user designates "type" and misses "numHarmonics"
     switch(type) {
         case WaveType::Sine:
@@ -44,7 +45,7 @@ void Oscillator::prepare(
             assert(false && "Invalid wave type");
             #endif
             // default to sine wave if invalid wave type is provided
-            type = WaveType::Sine;
+            type_ = WaveType::Sine;
             numHarmonics_ = 1;
             break;
     }
@@ -73,12 +74,8 @@ void Oscillator::prepare(
         assert(2 <= numHarmonics_  && numHarmonics_  <= kMaxHarmsNum_);
     }
     #endif
-
-    phase_ = 0.0;
-    harmonicAmps_.fill(0.0);
     calcHarmonicAmps();
-
-}  // Oscillator::prepare
+} // Oscillator::setWaveType
 
 void Oscillator::setFrequency(
     std::uint8_t midiNoteNumber
@@ -149,13 +146,32 @@ double Oscillator::renderSample() noexcept
         double harmonicSample = std::sin(2 * std::numbers::pi * harmonicPhase);
         sample += harmonicAmps_[i] * harmonicSample;
     }
+    wrapPhase();
+    return sample;
+}  // Oscillator::renderSample
 
+void Oscillator::wrapPhase() noexcept
+{
     const double phaseIncrement = frequency_ / sampleRate_;
     double nextPhase = phase_ + phaseIncrement;
     nextPhase = (1.0 <= nextPhase) ? (nextPhase - 1.0) : nextPhase;
     phase_ = nextPhase;
+}
 
-    return sample;
-}  // Oscillator::renderSample
+void Oscillator::reset() noexcept
+{
+    type_ = WaveType::Sine;
+    sampleRate_ = 0.0 / 0.0;
+    frequency_ = 0.0 /0.0;
+    phase_ = 0.0;
+
+    harmonicAmps_.fill(0.0);
+
+    // default to 1 for sine wave
+    numHarmonics_ = 1;
+    
+    // disallows aliasing experiments initially.
+    allowAliasing_ = false;
+}  // Oscillator::reset
 
 }  // namespace score_audio_studio::dsp
