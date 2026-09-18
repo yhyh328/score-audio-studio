@@ -33,23 +33,24 @@ public:
 
 private:
     static constexpr std::uint8_t kMaxHarmsNum_ = 64;
-    
+
     void calcHarmonicAmps() noexcept;
     void wrapPhase() noexcept;
-    
+
     WaveType type_{WaveType::Sine};
-   
+
     double sampleRate_{std::numeric_limits<double>::quiet_NaN()};
     double frequency_{std::numeric_limits<double>::quiet_NaN()};
     double phase_{0.0};
-  
-    std::array<double, kMaxHarmsNum_> harmonicAmps_;
-    
-    // default to 1 for sine wave
+
+    // Sine default: fundamental amplitude 1.0, all others 0.0.
+    std::array<double, kMaxHarmsNum_> harmonicAmps_{1.0};
+
+    // Sine default: one active harmonic.
     std::uint8_t numHarmonics_{1};
 
     // Allows frequencies above Nyquist for aliasing experiments.
-    bool allowAliasing_{false}; 
+    bool allowAliasing_{false};
 };
 
 }  // namespace score_audio_studio::dsp
