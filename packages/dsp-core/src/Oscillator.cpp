@@ -139,11 +139,10 @@ double Oscillator::renderSample() noexcept
 
 void Oscillator::wrapPhase() noexcept
 {
-    const double phaseIncrement = frequency_ / sampleRate_;
-    double nextPhase = phase_ + phaseIncrement;
-    nextPhase = (1.0 <= nextPhase) ? (nextPhase - 1.0) : nextPhase;
-    phase_ = nextPhase;
-}
+    // Keep phase within [0.0, 1.0) even if more than one cycle is crossed.
+    phase_ += frequency_ / sampleRate_;
+    phase_ -= std::floor(phase_);
+}  // Oscillator::wrapPhase
 
 void Oscillator::reset() noexcept
 {
