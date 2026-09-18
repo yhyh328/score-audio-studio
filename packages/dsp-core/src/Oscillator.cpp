@@ -52,7 +52,7 @@ void Oscillator::setWaveType(
 
     type_ = type;
 
-    if (type != WaveType::Sine) {
+    if (type_ != WaveType::Sine) {
         // check if user wants more harmonics 
         // than the minimum required for the wave type
         numHarmonics_ = std::max(numHarmonics, numHarmonics_);
@@ -60,20 +60,6 @@ void Oscillator::setWaveType(
     // check if user's harmonics exceed the maximum allowed
     numHarmonics_ = std::min(numHarmonics_, kMaxHarmsNum_);
 
-    #ifndef NDEBUG
-    // verify sine wave
-    if (type_ == WaveType::Sine || numHarmonics_ == 1) {
-        assert(type_ == WaveType::Sine || numHarmonics_ == 1);
-    }
-    // verify triangle and sqaure waves
-    else if (type_ == WaveType::Triangle || type_ == WaveType::Square) {
-        assert(3 <= numHarmonics_  && numHarmonics_  <= kMaxHarmsNum_);
-    }
-    // verify sawtooth wave
-    else if (type_ == WaveType::Sawtooth) {
-        assert(2 <= numHarmonics_  && numHarmonics_  <= kMaxHarmsNum_);
-    }
-    #endif
     calcHarmonicAmps();
 } // Oscillator::setWaveType
 
@@ -108,6 +94,7 @@ void Oscillator::calcHarmonicAmps() noexcept
                     continue;
                 }
                 harmonicAmps_[i] = gain / (j * j);
+                gain *= -1.0;
             }
             break;
         case WaveType::Square:
@@ -160,18 +147,13 @@ void Oscillator::wrapPhase() noexcept
 
 void Oscillator::reset() noexcept
 {
-    type_ = WaveType::Sine;
-    sampleRate_ = 0.0 / 0.0;
-    frequency_ = 0.0 /0.0;
     phase_ = 0.0;
-
-    harmonicAmps_.fill(0.0);
-
-    // default to 1 for sine wave
-    numHarmonics_ = 1;
-    
-    // disallows aliasing experiments initially.
     allowAliasing_ = false;
 }  // Oscillator::reset
+
+void Oscillator::setAllowAliasing(bool enabled) noexcept
+{
+    allowAliasing_ = enabled;
+}  // Oscillator::setAllowAliasing
 
 }  // namespace score_audio_studio::dsp

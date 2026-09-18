@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdint>
 #include <array>
+#include <limits>
 
 namespace score_audio_studio::dsp {
 
@@ -28,6 +29,7 @@ public:
     ) noexcept;
     double renderSample() noexcept;
     void reset() noexcept;
+    void setAllowAliasing(bool enabled) noexcept;
 
 private:
     static constexpr std::uint8_t kMaxHarmsNum_ = 64;
@@ -37,8 +39,8 @@ private:
     
     WaveType type_{WaveType::Sine};
    
-    double sampleRate_{0.0 / 0.0};
-    double frequency_{0.0 / 0.0};
+    double sampleRate_{std::numeric_limits<double>::quiet_NaN()};
+    double frequency_{std::numeric_limits<double>::quiet_NaN()};
     double phase_{0.0};
   
     std::array<double, kMaxHarmsNum_> harmonicAmps_;
