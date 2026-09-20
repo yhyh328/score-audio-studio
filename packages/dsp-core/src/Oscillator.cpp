@@ -78,6 +78,11 @@ void Oscillator::setFrequency(
     #endif
 }  // Oscillator::setFrequency
 
+double Oscillator::getFrequency() noexcept
+{
+    return frequency_;
+}  // Oscillator::getFrequency
+
 void Oscillator::calcHarmonicAmps() noexcept
 {
     std::uint8_t i, j;

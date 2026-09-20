@@ -23,6 +23,7 @@ public:
     void setFrequency(
         const std::uint8_t midiNoteNumber
     ) noexcept;
+    [[nodiscard]] double getFrequency() noexcept;
     void setWaveType(
         const WaveType type = WaveType::Sine,
         const std::uint8_t numHarmonics = 1
