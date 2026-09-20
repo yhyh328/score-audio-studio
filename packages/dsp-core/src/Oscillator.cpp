@@ -71,11 +71,6 @@ void Oscillator::setFrequency(
     frequency_ = 440.0 * std::pow(
         2.0, (static_cast<double>(midiNoteNumber) - 69.0) / 12.0
     );
-    #ifndef NDEBUG
-    if (!allowAliasing_) {
-        assert(frequency_ <= sampleRate_ / 2.0);
-    }
-    #endif
 }  // Oscillator::setFrequency
 
 double Oscillator::getFrequency() noexcept
@@ -133,8 +128,14 @@ double Oscillator::renderSample() noexcept
     double sample = 0.0;
 
     for (std::uint8_t i = 0; i < numHarmonics_; ++i) {
-        std::uint8_t harmonicNum = i + 1;
-        double harmonicPhase = phase_ * static_cast<double>(harmonicNum);
+        double harmonicNum = static_cast<double>(i) + 1.0;
+        if (!allowAliasing_) {
+            double harmonicFrequency = frequency_ * harmonicNum;
+            if (harmonicFrequency > sampleRate_ / 2.0) {
+                break;
+            }
+        }
+        double harmonicPhase = phase_ * harmonicNum;
         double harmonicSample = std::sin(2 * std::numbers::pi * harmonicPhase);
         sample += harmonicAmps_[i] * harmonicSample;
     }
