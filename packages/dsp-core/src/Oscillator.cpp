@@ -47,7 +47,8 @@ void Oscillator::setWaveType(
             // default to sine wave if invalid wave type is provided
             type_ = WaveType::Sine;
             numHarmonics_ = 1;
-            break;
+            calcHarmonicAmps();
+            return;
     }
 
     type_ = type;
