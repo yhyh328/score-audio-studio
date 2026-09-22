@@ -1,5 +1,13 @@
 #include <iostream>
 #include <cassert>
+#include <ctime>
+#include <fstream>
+#include <filesystem>
+#include <initializer_list>
+#include <span>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 
 #include "score_audio_studio/dsp/Oscillator.hpp"
 
@@ -43,6 +51,124 @@ namespace {
     {
         return std::abs(actual - expected) < kTolerance;
     } // nearlyEqual
+
+    bool gGenerateInputs = false;
+    void generateInputs(
+        const std::string dirName,
+        const WaveType type,
+        const std::initializer_list<const SampleBuffer*> samplesArr,
+        const std::uint32_t cycles
+    ) {
+        /**
+         * Plot oscillator waveform samples from CSV files for visual verification.
+         *
+         * This function is expected to be called by
+         * score-audio-studio/tools/visualize_oscillator.py,
+         * to generate CSV files like below:
+         *
+         *  score-audio-studio/packages/dsp-core/tests/data/Oscillator/
+         *  ├── test-default-sine
+         *  │   └── Sine_yyyymmdd_hhmmss.csv
+         *  ├── test-default-wave-forms
+         *  │   ├── Sine_yyyymmdd_hhmmss.csv
+         *  │   ├── Triangle_yyyymmdd_hhmmss.csv
+         *  │   ├── Square_yyyymmdd_hhmmss.csv
+         *  │   └── Sawtooth_yyyymmdd_hhmmss.csv
+         *  ├── test-harmonic-limit
+         *  │   ├── Sine_yyyymmdd_hhmmss.csv
+         *  │   ├── Triangle_yyyymmdd_hhmmss.csv
+         *  │   ├── Square_yyyymmdd_hhmmss.csv
+         *  │   └── Sawtooth_yyyymmdd_hhmmss.csv
+         *  ├── test-aliasing-allowed
+         *  │   ├── Sine_yyyymmdd_hhmmss.csv
+         *  │   ├── Triangle_yyyymmdd_hhmmss.csv
+         *  │   ├── Square_yyyymmdd_hhmmss.csv
+         *  │   └── Sawtooth_yyyymmdd_hhmmss.csv
+         *  └── test-harmonics-above-nyquist-are-filtered
+         *      ├── Triangle_yyyymmdd_hhmmss.csv
+         *      ├── Square_yyyymmdd_hhmmss.csv
+         *      └── Sawtooth_yyyymmdd_hhmmss.csv
+         *
+         * The CSV files are then converted into waveform graphs.
+         */
+
+        // Prevention of the Integer-Overflow from 2038.
+        static_assert(
+            8 <= sizeof(std::time_t),
+            "CSV timestamps require at least 64-bit time_t"
+        );
+
+        // Generate a timestamp for the CSV file name.
+        const std::string waveType =\
+            (type == WaveType::Sine)     ? "Sine"    :
+            (type == WaveType::Triangle) ? "Triangle":
+            (type == WaveType::Square)   ? "Square"  : "Sawtooth";
+
+        std::time_t now = std::time(nullptr);
+        const std::tm* local = std::localtime(&now);
+        char timestamp[16]; // "yyyymmdd_hhmmss"
+        if
+        (
+            local == nullptr
+            ||
+            std::strftime(timestamp, sizeof(timestamp), "%Y%m%d_%H%M%S", local) == 0
+        ) {
+            throw std::runtime_error("Cannot create timestamp");
+        }
+        const std::string fileName = waveType + "_" + timestamp;
+
+        // Choose the waveform directory name.
+        std::filesystem::path inputDir =\
+            std::filesystem::path{
+                "packages/dsp-core/tests/data/Oscillator/"
+            } / dirName;
+        std::error_code error;
+        std::filesystem::create_directories(inputDir, error);
+        if (error) {
+            throw std::runtime_error(
+                "Cannot create directory " + inputDir.string() + ": " + error.message()
+            );
+        }
+
+        // Set the CSV path.
+        const std::filesystem::path csvPath = inputDir / (fileName + ".csv");
+        std::ofstream csv(csvPath);
+        if (!csv) {
+            throw std::runtime_error("Cannot open file: " + csvPath.string());
+        }
+
+        // aliasing test needs two buffers.
+        if (samplesArr.size() == 2) {
+            csv << waveType << "_normal" << ","
+                << waveType << "_aliasing\n";
+        }
+        else {
+            csv << waveType << "\n";
+        }
+
+        // Put samples into the CSV file.
+        for (std::size_t i = 0; i < cycles; ++i) {
+            bool first = true;
+            for (const SampleBuffer* samples : samplesArr) {
+                if (!first) {
+                    csv << ',';
+                }
+                csv << (*samples)[i];
+                first = false;
+            }
+            csv << '\n';
+        }
+        csv.close();
+        if (!csv) {
+            throw std::runtime_error("Cannot write file: " + csvPath.string());
+        }
+
+        std::cout << "  "
+                  << fileName
+                  << " is generated: "
+                  << dirName
+                  << std::endl;
+    } // generateInputs
 
     void testDefaultSine()
     {
@@ -95,6 +221,10 @@ namespace {
             &&
             "Wrong Sample"
         );
+        if (gGenerateInputs) {
+            const std::string dirName = "test-default-sine";
+            generateInputs(dirName, WaveType::Sine, {&samples}, circle * 10);
+        }
     } // testDefaultSine
 
     void testDefaultWaveForms()
@@ -236,6 +366,10 @@ namespace {
                 default:
                     assert(false && "Wrong Wave Type");
                     break;
+            }
+            if (gGenerateInputs) {
+                const std::string dirName = "test-default-wave-forms";
+                generateInputs(dirName, type, {&samples}, circle * 10);
             }
         }
     }  // testDefaultWaveForms
@@ -402,6 +536,10 @@ namespace {
                     assert(false && "Wrong Wave Type");
                     break;
             }
+            if (gGenerateInputs) {
+                const std::string dirName = "test-harmonic-limit";
+                generateInputs(dirName, type, {&samples}, circle * 10);
+            }
         }
     }  // testHarmonicLimit
 
@@ -430,6 +568,7 @@ namespace {
                 "reset() did not restore the initial oscillator phase_"
             );
         }
+        // This test doesn't generate CSV files.
     }  // testReset
 
     void testAliasingAllowed()
@@ -485,6 +624,10 @@ namespace {
                 &&
                 "Expected a non-silent signal when aliasing is enabled"
             );
+            if (gGenerateInputs) {
+                const std::string dirName = "test-aliasing-allowed";
+                generateInputs(dirName, type, {&samples1, &samples2}, 256);
+            }
         }
     }  // testAliasingAllowed
 
@@ -537,19 +680,62 @@ namespace {
                 }
             }
             assert(differs);
+            if (gGenerateInputs) {
+                const std::string dirName = "test-harmonics-above-nyquist-are-filtered";
+                generateInputs(dirName, type, {&samples1, &samples2}, 256);
+            }
         }
 
     }  // testHarmonicsAboveNyquistAreFiltered
 
+    void help(std::ostream& output)
+    {
+        output << "Usage: oscillator_test [--generate-inputs | --help]\n"
+               << "\n"
+               << "Options:\n"
+               << "  (no arguments)      Run the oscillator tests.\n"
+               << "  --generate-inputs   Input generation.\n"
+               << "  -h, --help          Show this help message.\n";
+    }  // help
+
 }  // namespace
 
-int main()
+int main(int argc, char* argv[])
 {
-    testDefaultSine();
-    testDefaultWaveForms();
-    testHarmonicLimit();
-    testReset();
-    testAliasingAllowed();
-    testHarmonicsAboveNyquistAreFiltered();
+    if (argc == 2) {
+        const std::string_view argument(argv[1]);
+        if (argument == "-h" || argument == "--help") {
+            help(std::cout);
+            return 0;
+        }
+        if (argument == "--generate-inputs") {
+            // generateInputs() ON
+            gGenerateInputs = true;
+            // Separate the CTest log from the CSV generation output.
+            std::cout << std::endl;
+            std::cout << std::endl;
+            std::cout << "Generating CSV files..." << std::endl;
+        }
+    }
+    if (argc != 1 && !gGenerateInputs) {
+        std::cerr << "Invalid arguments.\n\n";
+        help(std::cerr);
+        return 1;
+    }
+    try {
+        testDefaultSine();
+        testDefaultWaveForms();
+        testHarmonicLimit();
+        testReset();
+        testAliasingAllowed();
+        testHarmonicsAboveNyquistAreFiltered();
+        if (gGenerateInputs) {
+            std::cout << "CSV generation complete." << std::endl;
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return 1;
+    }
     return 0;
 }
