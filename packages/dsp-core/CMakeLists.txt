@@ -8,6 +8,7 @@ add_library(score_audio_studio_dsp_core STATIC
     src/LibrarySmokeTest.cpp
     src/AudioEngine.cpp
     src/Oscillator.cpp
+    src/AdsrEnvelope.cpp
 )
 
 add_library(score_audio_studio::dsp_core
