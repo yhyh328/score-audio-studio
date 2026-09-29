@@ -31,6 +31,8 @@ namespace
                             kReleaseSamples =\
                             static_cast<std::uint32_t>(kSampleRate * kReleaseSeconds);
 
+    constexpr float kTolerance = 1e-6;
+
     void runAdsrScenario(
         AdsrEnvelope& envelope,
         EnvelopeCurve curve
@@ -107,33 +109,48 @@ namespace
         /**
          * 4. process
          */
+        float prvGain = 0.0f,
+              curGain = envelope.getGain();
+
         //           ⬇
         // Idle => Attack => Decay => Sustain => Release
         std::cout << "    Stage Attack is processing..." << std::endl;
+        std::cout << "    gain: " << curGain << "\n";
         for (std::uint32_t i = 0; i < kAttackSamples; ++i)
         {
             envelope.process();
-            std::cout << "    gain: " << envelope.getGain() << "\n";
+            curGain = envelope.getGain();
+            assert(prvGain - kTolerance < curGain);
+            std::cout << "    gain: " << curGain << "\n";
+            prvGain = curGain;
         }
         std::cout << std::endl;
 
         //                     ⬇
         // Idle => Attack => Decay => Sustain => Release
         std::cout << "    Stage Decay is processing..." << std::endl;
+        std::cout << "    gain: " << curGain << "\n";
         for (std::uint32_t i = 0; i < kDecaySamples; ++i)
         {
             envelope.process();
-            std::cout << "    gain: " << envelope.getGain() << "\n";
+            curGain = envelope.getGain();
+            std::cout << "    gain: " << curGain << "\n";
+            assert(prvGain > curGain - kTolerance);
+            prvGain = curGain;
         }
         std::cout << std::endl;
 
         //                               ⬇
         // Idle => Attack => Decay => Sustain => Release
         std::cout << "    Stage Sustain is processing..." << std::endl;
+        std::cout << "    gain: " << curGain << "\n";
         for (std::uint32_t i = 0; i < kSustainSamples; ++i)
         {
             envelope.process();
-            std::cout << "    gain: " << envelope.getGain() << "\n";
+            curGain = envelope.getGain();
+            std::cout << "    gain: " << curGain << "\n";
+            assert(prvGain == curGain);
+            prvGain = curGain;
         }
         std::cout << std::endl;
 
@@ -150,10 +167,14 @@ namespace
          * gain from the current level to zero over the release time.
          */
         std::cout << "    Stage Release is processing..." << std::endl;
+        std::cout << "    gain: " << curGain << "\n";
         for (std::uint32_t i = 0; i < kReleaseSamples; ++i)
         {
             envelope.process();
-            std::cout << "    gain: " << envelope.getGain() << "\n";
+            curGain = envelope.getGain();
+            std::cout << "    gain: " << curGain << "\n";
+            assert(prvGain > curGain - kTolerance);
+            prvGain = curGain;
         }
         std::cout << std::endl;
 

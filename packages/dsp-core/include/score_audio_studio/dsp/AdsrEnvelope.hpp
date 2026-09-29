@@ -80,7 +80,7 @@ private:
         EnvelopeStage::Idle
     };
 
-    double elapsedSeconds_{};
+    std::uint64_t elapsedSamples_{};
 
     float gain_{};          // Current envelope gain
     float targetGain_{};    // Destination gain

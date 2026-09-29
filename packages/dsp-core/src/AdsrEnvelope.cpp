@@ -131,8 +131,10 @@ void AdsrEnvelope::setStage(
         return;
     }
     stage_ = stage;
-    elapsedSeconds_ = 0.0;
-    updateGain();
+    elapsedSamples_ = 0;
+    gainIncrement_ = 0.0f;
+    std::size_t index = static_cast<size_t>(stage_);
+    targetGain_ = adsrSettings_[index].targetGain;
 }  // AdsrEnvelope::setStage
 
 void AdsrEnvelope::process() noexcept
@@ -143,23 +145,14 @@ void AdsrEnvelope::process() noexcept
             break;
         case EnvelopeStage::Attack:
             updateGain();
-            if (targetGain_ <= gain_) {
-                setStage(EnvelopeStage::Decay);
-            }
             break;
         case EnvelopeStage::Decay:
             updateGain();
-            if (gain_ <= targetGain_) {
-                setStage(EnvelopeStage::Sustain);
-            }
             break;
         case EnvelopeStage::Sustain:
             break;
         case EnvelopeStage::Release:
             updateGain();
-            if (gain_ <= targetGain_) {
-                setStage(EnvelopeStage::Idle);
-            }
             break;
     }
 }  // AdsrEnvelope::process
@@ -168,49 +161,63 @@ void AdsrEnvelope::updateGain() noexcept
 {
     std::size_t index = static_cast<size_t>(stage_);
 
+    bool isStageComplete = false;
+
     const auto [
         seconds, targetGain
     ] = adsrSettings_[index];
     targetGain_ = targetGain;
 
-    float remainingSeconds = seconds - elapsedSeconds_;
+    if (seconds <= 0.0) {
+        isStageComplete = true;
+    }
+    else {
+        const std::uint64_t totalSamples =\
+            std::llround(sampleRate_ * seconds);
+        if (totalSamples == 0) {
+            isStageComplete = true;
+        }
+        else {
+            const std::uint64_t remainingSamples =\
+                totalSamples - elapsedSamples_;
 
-    // Avoid divison by zero
-    if (remainingSeconds <= 0.0f || seconds <= 0.0f) {
+            const float gainDelta = targetGain_ - gain_;
+
+            switch (curve_) {
+                case EnvelopeCurve::None:
+                    break;
+                case EnvelopeCurve::Linear:
+                    gainIncrement_ =\
+                        gainDelta / static_cast<float>(remainingSamples);
+                    break;
+                case EnvelopeCurve::Exponential:
+                    /**
+                     * coeff_ is the filter coefficient
+                     * per samples to close 99.9% of the gain gap.
+                     */
+                    const float coeff = static_cast<float>(
+                        1.0 - std::exp(
+                            -6.9 / static_cast<double>(totalSamples)
+                        )
+                    );
+                    gainIncrement_ = coeff * gainDelta;
+                    break;
+            }
+            gain_ += gainIncrement_;
+            ++elapsedSamples_;
+
+            if (totalSamples <= elapsedSamples_) {
+                isStageComplete = true;
+            }
+        }
+    }
+    if (isStageComplete) {
         gain_ = targetGain_;
-        gainIncrement_ = 0.0f;
-        return;
+        EnvelopeStage nextStage =\
+            static_cast<EnvelopeStage>((index + 1) % 5);
+        setStage(nextStage);
     }
 
-    const float samples = std::max(
-        1.0f, static_cast<float>(sampleRate_ * remainingSeconds)
-    );
-
-    const float gainDelta = targetGain_ - gain_;
-
-    switch (curve_) {
-        case EnvelopeCurve::None:
-            break;
-        case EnvelopeCurve::Linear:
-            gainIncrement_ = gainDelta / samples;
-            break;
-        case EnvelopeCurve::Exponential:
-            /**
-             * coeff_ is the filter coefficient
-             * per samples to close 99.9% of the gain gap.
-             */
-            const float coeff = static_cast<float>(
-                1.0 - std::exp(-6.9 / samples)
-            );
-            gainIncrement_ = coeff * gainDelta;
-            break;
-    }
-    gain_ += gainIncrement_;
-    elapsedSeconds_ += 1.0 / sampleRate_;
-
-    // prevent overshoot
-    gain_ = (0.0f < gainIncrement_) ? std::min(gain_, targetGain_)
-                                    : std::max(gain_, targetGain_);
 }  // AdsrEnvelope::updateGain
 
 void AdsrEnvelope::noteOff() noexcept
@@ -221,7 +228,7 @@ void AdsrEnvelope::noteOff() noexcept
 void AdsrEnvelope::reset() noexcept
 {
     stage_ = EnvelopeStage::Idle;
-    elapsedSeconds_ = 0.0;
+    elapsedSamples_ = 0;
     gain_ = 0.0f;
     targetGain_ = 0.0f;
     gainIncrement_ = 0.0f;
