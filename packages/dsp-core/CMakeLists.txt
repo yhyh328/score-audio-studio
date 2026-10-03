@@ -30,6 +30,14 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
             -Wextra
             -Wpedantic
     )
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_options(score_audio_studio_dsp_core
+            PRIVATE
+                -fsanitize=address,undefined
+                -fno-omit-frame-pointer
+                -fno-sanitize-recover=all
+        )
+    endif()
 endif()
 
 if(BUILD_TESTING)
