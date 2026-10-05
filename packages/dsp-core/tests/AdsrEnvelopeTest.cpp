@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <string_view>
@@ -11,51 +12,50 @@ namespace
 
     constexpr double kSampleRate = 8000.0;
 
-    constexpr double kAttackSeconds  = 0.5,
-                     kDecaySeconds   = 0.1,
-                     kSustainSeconds = 3.0,
-                     kReleaseSeconds = 1.0;
-
     constexpr float kAttackTargetGain = 0.9f,
                     kDecayTargetGain  = 0.6f;
 
     bool gLinear         = false,
          gExponential    = false;
 
-    constexpr std::uint32_t kAttackSamples  =\
-                            static_cast<std::uint32_t>(kSampleRate * kAttackSeconds),
-                            kDecaySamples   =\
-                            static_cast<std::uint32_t>(kSampleRate * kDecaySeconds),
-                            kSustainSamples =\
-                            static_cast<std::uint32_t>(kSampleRate * kSustainSeconds),
-                            kReleaseSamples =\
-                            static_cast<std::uint32_t>(kSampleRate * kReleaseSeconds);
-
     constexpr float kTolerance = 1e-6;
 
     void runAdsrScenario(
         AdsrEnvelope& envelope,
-        EnvelopeCurve curve
+        EnvelopeCurve curve,
+        double attackSeconds,
+        double decaySeconds,
+        double sustainSeconds,
+        double releaseSeconds
     )
     {
         std::cout << "Sample Rate: " << kSampleRate << std::endl;
         std::cout << std::endl;
 
         std::cout << "Attack ⇒   " 
-                  << "seconds: "         << kAttackSeconds
+                  << "seconds: "         << attackSeconds
                   << "    target gain: " << kAttackTargetGain
                   << std::endl;
         std::cout << "Decay ⇒   " 
-                  << "seconds: "         << kDecaySeconds
+                  << "seconds: "         << decaySeconds
                   << "    target gain: " << kDecayTargetGain
                   << std::endl;
         std::cout << "Sustain ⇒   " 
-                  << "seconds: "         << kSustainSeconds
+                  << "seconds: "         << sustainSeconds
                   << std::endl;
         std::cout << "Release ⇒   " 
-                  << "seconds: "         << kReleaseSeconds
+                  << "seconds: "         << releaseSeconds
                   << std::endl;
         std::cout << std::endl;
+
+        const std::uint32_t attackSamples  =\
+            static_cast<std::uint32_t>(std::round(kSampleRate * attackSeconds));
+        const std::uint32_t decaySamples   =\
+            static_cast<std::uint32_t>(std::round(kSampleRate * decaySeconds));
+        const std::uint32_t sustainSamples =\
+            static_cast<std::uint32_t>(std::round(kSampleRate * sustainSeconds));
+        const std::uint32_t releaseSamples =\
+            static_cast<std::uint32_t>(std::round(kSampleRate * releaseSeconds));
 
         switch (curve) {
             case EnvelopeCurve::Linear:
@@ -68,7 +68,7 @@ namespace
                 break;
         }
         std::cout << std::endl;
-        
+
         /**
          * 1. Set ADSR features.
          *
@@ -76,15 +76,15 @@ namespace
          *     Attack, Decay, Sustain, Release
          */
         envelope.setAttackFeatures(
-            kAttackSeconds,
+            attackSeconds,
             kAttackTargetGain
         );
         envelope.setDecayFeatures(
-            kDecaySeconds,
+            decaySeconds,
             kDecayTargetGain
         );
-        envelope.setSustainFeatures(kSustainSeconds);
-        envelope.setReleaseFeatures(kReleaseSeconds);
+        envelope.setSustainFeatures(sustainSeconds);
+        envelope.setReleaseFeatures(releaseSeconds);
 
         /**
          * 2. Prepare ADSR envelope.
@@ -114,29 +114,60 @@ namespace
 
         //           ⬇
         // Idle => Attack => Decay => Sustain => Release
-        std::cout << "    Stage Attack is processing..." << std::endl;
-        std::cout << "    gain: " << curGain << "\n";
-        for (std::uint32_t i = 0; i < kAttackSamples; ++i)
-        {
-            envelope.process();
-            curGain = envelope.getGain();
-            assert(prvGain - kTolerance < curGain);
-            std::cout << "    gain: " << curGain << "\n";
+        if (attackSamples == 0) {
+            std::cout << "    Stage Attack is skipped." << std::endl;
             prvGain = curGain;
+        }
+        else {
+            std::cout << "    Stage Attack is processing..." << std::endl;
+            for (std::uint32_t i = 0; i < attackSamples; ++i)
+            {
+                envelope.process();
+                curGain = envelope.getGain();
+                std::cout << "    gain: " << curGain << "\n";
+                /**
+                 * If the Decay stage has zero samples,
+                 * the last Attack process may advance directly to the Decay target gain.
+                 * Therefore, the Attack target gain may not be observable
+                 * on the last Attack sample.
+                 */
+                if 
+                (
+                    decaySamples == 0 && i == attackSamples - 1
+                ) {
+                    assert
+                    (
+                        std::abs(curGain - kDecayTargetGain) < kTolerance
+                    );
+                }
+                else {
+                    assert(prvGain - curGain <= kTolerance);
+                }
+                prvGain = curGain;
+            }
         }
         std::cout << std::endl;
 
         //                     ⬇
         // Idle => Attack => Decay => Sustain => Release
-        std::cout << "    Stage Decay is processing..." << std::endl;
-        std::cout << "    gain: " << curGain << "\n";
-        for (std::uint32_t i = 0; i < kDecaySamples; ++i)
-        {
-            envelope.process();
-            curGain = envelope.getGain();
-            std::cout << "    gain: " << curGain << "\n";
-            assert(prvGain > curGain - kTolerance);
+        if (decaySamples == 0) {
+            std::cout << "    Stage Decay is skipped." << std::endl;
+            assert
+            (
+                std::abs(curGain - kDecayTargetGain) < kTolerance
+            );
             prvGain = curGain;
+        }
+        else {
+            std::cout << "    Stage Decay is processing..." << std::endl;
+            for (std::uint32_t i = 0; i < decaySamples; ++i)
+            {
+                envelope.process();
+                curGain = envelope.getGain();
+                std::cout << "    gain: " << curGain << "\n";
+                assert(prvGain >= curGain - kTolerance);
+                prvGain = curGain;
+            }
         }
         std::cout << std::endl;
 
@@ -144,11 +175,10 @@ namespace
         // Idle => Attack => Decay => Sustain => Release
         std::cout << "    Stage Sustain is processing..." << std::endl;
         std::cout << "    gain: " << curGain << "\n";
-        for (std::uint32_t i = 0; i < kSustainSamples; ++i)
+        for (std::uint32_t i = 0; i < sustainSamples; ++i)
         {
             envelope.process();
             curGain = envelope.getGain();
-            std::cout << "    gain: " << curGain << "\n";
             assert(prvGain == curGain);
             prvGain = curGain;
         }
@@ -162,19 +192,27 @@ namespace
          */
         envelope.noteOff();
         /**
-         * noteOff() does not silence the envelope immediately.
-         * Subsequent process() calls are required to move the
-         * gain from the current level to zero over the release time.
+         * If Release has samples, subsequent process() calls
+         * move the gain from the current level to zero.
+         * A zero-sample Release reaches zero immediately.
          */
-        std::cout << "    Stage Release is processing..." << std::endl;
-        std::cout << "    gain: " << curGain << "\n";
-        for (std::uint32_t i = 0; i < kReleaseSamples; ++i)
-        {
-            envelope.process();
+        if (releaseSamples == 0) {
             curGain = envelope.getGain();
-            std::cout << "    gain: " << curGain << "\n";
-            assert(prvGain > curGain - kTolerance);
+            std::cout << "    Stage Release is skipped." << std::endl;
+            assert
+            (curGain == 0.0f);
             prvGain = curGain;
+        }
+        else {
+            std::cout << "    Stage Release is processing..." << std::endl;
+            for (std::uint32_t i = 0; i < releaseSamples; ++i)
+            {
+                envelope.process();
+                curGain = envelope.getGain();
+                std::cout << "    gain: " << curGain << "\n";
+                assert(prvGain >= curGain - kTolerance);
+                prvGain = curGain;
+            }
         }
         std::cout << std::endl;
 
@@ -201,8 +239,57 @@ int main(int argc, char* argv[])
 {
     try {
         AdsrEnvelope envelope;
-        runAdsrScenario(envelope, EnvelopeCurve::Linear);
-        runAdsrScenario(envelope, EnvelopeCurve::Exponential);
+        for (EnvelopeCurve curve : { EnvelopeCurve::Linear, EnvelopeCurve::Exponential })
+        {
+            runAdsrScenario(
+                envelope,
+                curve,
+                0.5,    // attackSeconds
+                0.1,    // decaySeconds
+                3.0,    // sustainSeconds
+                1.0     // releaseSeconds
+            );
+            runAdsrScenario(
+                envelope,
+                curve,
+                0.0,    // attackSeconds
+                0.1,    // decaySeconds
+                3.0,    // sustainSeconds
+                1.0     // releaseSeconds
+            );
+            runAdsrScenario(
+                envelope,
+                curve,
+                0.5,    // attackSeconds
+                0.0,    // decaySeconds
+                3.0,    // sustainSeconds
+                1.0     // releaseSeconds
+            );
+            runAdsrScenario(
+                envelope,
+                curve,
+                0.5,    // attackSeconds
+                0.1,    // decaySeconds
+                0.0,    // sustainSeconds
+                1.0     // releaseSeconds
+            );
+            runAdsrScenario(
+                envelope,
+                curve,
+                0.5,    // attackSeconds
+                0.1,    // decaySeconds
+                3.0,    // sustainSeconds
+                0.0     // releaseSeconds
+            );
+            runAdsrScenario(
+                envelope,
+                curve,
+                0.0,    // attackSeconds
+                0.0,    // decaySeconds
+                0.0,    // sustainSeconds
+                0.0     // releaseSeconds
+            );
+        }
     }
     catch (const std::exception& e) {
         std::cerr << e.what() << '\n';

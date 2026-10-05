@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 #include <limits>
 
 namespace score_audio_studio::dsp {
@@ -67,6 +68,10 @@ public:
 
 private:
     StageFeatures adsrSettings_[5]{};
+
+    // The number of samples for each stage.
+    std::uint32_t adsrSamples_[5]{};
+    
     bool isSetFeatures_[5]{};
 
     double sampleRate_{
@@ -80,7 +85,7 @@ private:
         EnvelopeStage::Idle
     };
 
-    std::uint64_t elapsedSamples_{};
+    std::uint32_t elapsedSamples_{};
 
     float gain_{};          // Current envelope gain
     float targetGain_{};    // Destination gain
@@ -88,6 +93,9 @@ private:
 
     void setStage(
         const EnvelopeStage stage
+    ) noexcept;
+    void skipZeroSampleStage(
+        const std::size_t index
     ) noexcept;
     void updateGain() noexcept;
 };

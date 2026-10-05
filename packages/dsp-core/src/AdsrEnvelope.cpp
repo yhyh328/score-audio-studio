@@ -115,6 +115,11 @@ void AdsrEnvelope::prepare(
         assert(false && "Invalid envelope curve");
     }
     curve_ = curve;
+
+    for (std::size_t i = 1; i < 5; ++i) {
+        const double seconds = adsrSettings_[i].seconds;
+        adsrSamples_[i] = std::round(sampleRate_ * seconds);
+    }
 }  // AdsrEnvelope::prepare
 
 void AdsrEnvelope::noteOn() noexcept
@@ -135,10 +140,30 @@ void AdsrEnvelope::setStage(
     gainIncrement_ = 0.0f;
     std::size_t index = static_cast<size_t>(stage_);
     targetGain_ = adsrSettings_[index].targetGain;
+    std::uint32_t samples = adsrSamples_[index];
+    if
+    (
+        samples == 0
+        &&
+        stage_ != EnvelopeStage::Sustain
+    )
+    {
+        skipZeroSampleStage(index);
+    }
 }  // AdsrEnvelope::setStage
 
+void AdsrEnvelope::skipZeroSampleStage(
+    const std::size_t index
+) noexcept
+{
+    gain_ = targetGain_;
+    std::size_t nextIndex = (index + 1) % 5;
+    EnvelopeStage nextStage = static_cast<EnvelopeStage>(nextIndex);
+    setStage(nextStage);
+}  // AdsrEnvelope::skipZeroSampleStage
+
 void AdsrEnvelope::process() noexcept
-// process() gets called every (1 / sampleRate_) seconds.
+// Each call advances the envelope by one audio sample.
 {
     switch (stage_) {
         case EnvelopeStage::Idle:
@@ -161,57 +186,36 @@ void AdsrEnvelope::updateGain() noexcept
 {
     std::size_t index = static_cast<size_t>(stage_);
 
-    bool isStageComplete = false;
+    const std::uint32_t totalSamples = adsrSamples_[index];
+    const std::uint32_t remainingSamples =\
+        totalSamples - elapsedSamples_;
 
-    const auto [
-        seconds, targetGain
-    ] = adsrSettings_[index];
-    targetGain_ = targetGain;
+    const float gainDelta = targetGain_ - gain_;
 
-    if (seconds <= 0.0) {
-        isStageComplete = true;
+    switch (curve_) {
+        case EnvelopeCurve::None:
+            break;
+        case EnvelopeCurve::Linear:
+            gainIncrement_ =\
+                gainDelta / static_cast<float>(remainingSamples);
+            break;
+        case EnvelopeCurve::Exponential:
+            /**
+             * coeff_ is the filter coefficient
+             * per samples to close 99.9% of the gain gap.
+             */
+            const float coeff = static_cast<float>(
+                1.0 - std::exp(
+                    -6.9 / static_cast<double>(totalSamples)
+                )
+            );
+            gainIncrement_ = coeff * gainDelta;
+            break;
     }
-    else {
-        const std::uint64_t totalSamples =\
-            std::llround(sampleRate_ * seconds);
-        if (totalSamples == 0) {
-            isStageComplete = true;
-        }
-        else {
-            const std::uint64_t remainingSamples =\
-                totalSamples - elapsedSamples_;
+    gain_ += gainIncrement_;
+    ++elapsedSamples_;
 
-            const float gainDelta = targetGain_ - gain_;
-
-            switch (curve_) {
-                case EnvelopeCurve::None:
-                    break;
-                case EnvelopeCurve::Linear:
-                    gainIncrement_ =\
-                        gainDelta / static_cast<float>(remainingSamples);
-                    break;
-                case EnvelopeCurve::Exponential:
-                    /**
-                     * coeff_ is the filter coefficient
-                     * per samples to close 99.9% of the gain gap.
-                     */
-                    const float coeff = static_cast<float>(
-                        1.0 - std::exp(
-                            -6.9 / static_cast<double>(totalSamples)
-                        )
-                    );
-                    gainIncrement_ = coeff * gainDelta;
-                    break;
-            }
-            gain_ += gainIncrement_;
-            ++elapsedSamples_;
-
-            if (totalSamples <= elapsedSamples_) {
-                isStageComplete = true;
-            }
-        }
-    }
-    if (isStageComplete) {
+    if (totalSamples <= elapsedSamples_) {
         gain_ = targetGain_;
         EnvelopeStage nextStage =\
             static_cast<EnvelopeStage>((index + 1) % 5);
