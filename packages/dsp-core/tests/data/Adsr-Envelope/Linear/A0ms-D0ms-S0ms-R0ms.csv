@@ -1,0 +1,12 @@
+# sample_rate=8000
+# curve=Linear
+# attack_seconds=0
+# attack_target=0.9
+# decay_seconds=0
+# decay_target=0.6
+# sustain_seconds=0
+# sustain_target=0.6
+# release_seconds=0
+# release_target=0
+gains
+0.6

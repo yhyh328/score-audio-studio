@@ -1,8 +1,13 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <stdexcept>
+#include <string>
 #include <string_view>
+#include <vector>
 
 #include "score_audio_studio/dsp/AdsrEnvelope.hpp"
 
@@ -16,7 +21,108 @@ namespace
                     kDecayTargetGain  = 0.6f;
 
     bool gLinear         = false,
-         gExponential    = false;
+         gExponential    = false,
+         gGenerateInputs = false;
+    
+    void generateInputs
+    (
+        const std::string dirName,
+        const EnvelopeCurve curve,
+        const double attackSeconds,
+        const double decaySeconds,
+        const double sustainSeconds,
+        const double releaseSeconds,
+        const std::vector<float>& gainVec
+    )
+    {
+        /**	
+         * Plot ADSR envelope curves from CSV files for visual verification.
+         *
+         * This function is expected to be called by
+         * score-audio-studio/tools/visualize_adsr_envelope.py,
+         * to generate CSV files like below:
+         *
+         *  score-audio-studio/docs/Adsr-Envelope/
+		 *  ├── Linear
+		 *  │   └── A[attack_secs]-D[decay_secs]-S[sustain_secs]-R[release_secs].csv
+		 *  └── Exponential
+		 *      └── A[attack_secs]-D[decay_secs]-S[sustain_secs]-R[release_secs].csv
+         *
+         * The CSV files are then converted into ADSR envelope curve graphs.
+         */
+
+        // Generate a CSV file name.
+        const std::string attackSecondsStr =\
+            std::to_string(static_cast<int>(std::round(attackSeconds * 1000.0))) + "ms";
+        const std::string decaySecondsStr =\
+            std::to_string(static_cast<int>(std::round(decaySeconds * 1000.0))) + "ms";
+        const std::string sustainSecondsStr =\
+            std::to_string(static_cast<int>(std::round(sustainSeconds * 1000.0))) + "ms";
+        const std::string releaseSecondsStr =\
+            std::to_string(static_cast<int>(std::round(releaseSeconds * 1000.0))) + "ms";
+
+        const std::string fileName =\
+            "A" + attackSecondsStr + "-D" + decaySecondsStr +
+            "-S" + sustainSecondsStr + "-R" + releaseSecondsStr;
+
+        // Choose the waveform directory name
+        std::filesystem::path inputDir =\
+            std::filesystem::path {
+                "packages/dsp-core/tests/data/Adsr-Envelope/"
+            } / dirName;
+        std::error_code error;
+        std::filesystem::create_directories(inputDir, error);
+        if (error) {
+            throw std::runtime_error(
+                "Cannot create directory " + inputDir.string() + ": " + error.message()
+            );
+        }
+
+        // Set the CSV path.
+        const std::filesystem::path csvPath = inputDir / (fileName + ".csv");
+        std::ofstream csv(csvPath);
+        if (!csv) {
+            throw std::runtime_error("Cannot open file: " + csvPath.string());
+        }
+
+        csv << "# sample_rate=" << kSampleRate << '\n';
+        csv << "# curve="
+            << ((curve == EnvelopeCurve::Linear)
+                ? "Linear"
+                : "Exponential")
+            << '\n';
+
+        csv << "# attack_seconds=" << attackSeconds << '\n';
+        csv << "# attack_target=" << kAttackTargetGain << '\n';
+
+        csv << "# decay_seconds=" << decaySeconds << '\n';
+        csv << "# decay_target=" << kDecayTargetGain << '\n';
+
+        csv << "# sustain_seconds=" << sustainSeconds << '\n';
+        csv << "# sustain_target=" << kDecayTargetGain << '\n';
+
+        csv << "# release_seconds=" << releaseSeconds << '\n';
+        csv << "# release_target=0\n";
+
+        csv << "gains\n";
+
+        // Put gains into the CSV file.
+        std::size_t i = 0;
+        while (i < gainVec.size()) { 
+            csv << gainVec[i++] << '\n';
+        }
+
+        csv.close();
+        if (!csv) {
+            throw std::runtime_error("Cannot write file: " + csvPath.string());
+        }
+
+        std::cout << "  "
+                  << fileName
+                  << " is generated: "
+                  << dirName
+                  << std::endl;
+    }  // generateInputs
 
     constexpr float kTolerance = 1e-6;
 
@@ -69,6 +175,9 @@ namespace
         }
         std::cout << std::endl;
 
+        // use for generateInputs() to create CSV files for visual verification.
+        std::vector<float> gainVec;
+
         /**
          * 1. Set ADSR features.
          *
@@ -111,6 +220,10 @@ namespace
          */
         float prvGain = 0.0f,
               curGain = envelope.getGain();
+        
+        if (gGenerateInputs) {
+            gainVec.push_back(curGain);
+        }
 
         //           ⬇
         // Idle => Attack => Decay => Sustain => Release
@@ -144,6 +257,9 @@ namespace
                     assert(prvGain - curGain <= kTolerance);
                 }
                 prvGain = curGain;
+                if (gGenerateInputs) {
+                    gainVec.push_back(curGain);
+                }
             }
         }
         std::cout << std::endl;
@@ -167,6 +283,9 @@ namespace
                 std::cout << "    gain: " << curGain << "\n";
                 assert(prvGain >= curGain - kTolerance);
                 prvGain = curGain;
+                if (gGenerateInputs) {
+                    gainVec.push_back(curGain);
+                }
             }
         }
         std::cout << std::endl;
@@ -181,6 +300,9 @@ namespace
             curGain = envelope.getGain();
             assert(prvGain == curGain);
             prvGain = curGain;
+            if (gGenerateInputs) {
+                gainVec.push_back(curGain);
+            }
         }
         std::cout << std::endl;
 
@@ -212,6 +334,9 @@ namespace
                 std::cout << "    gain: " << curGain << "\n";
                 assert(prvGain >= curGain - kTolerance);
                 prvGain = curGain;
+                if (gGenerateInputs) {
+                    gainVec.push_back(curGain);
+                }
             }
         }
         std::cout << std::endl;
@@ -221,6 +346,26 @@ namespace
         assert(envelope.getGain() == 0.0f);
         std::cout << "    Return to stage Idle" << std::endl;
         std::cout << "    gain: " << envelope.getGain() << std::endl;
+
+        if (gGenerateInputs) {
+            // Separate the CTest log from the CSV generation output.
+            std::cout << std::endl;
+            std::cout << std::endl;
+            std::cout << "Generating CSV files..." << std::endl;
+
+            const std::string dirName =\
+                (curve == EnvelopeCurve::Linear) ? "Linear" : "Exponential";
+
+            generateInputs(
+                dirName,
+                curve,
+                attackSeconds,
+                decaySeconds,
+                sustainSeconds,
+                releaseSeconds,
+                gainVec
+            );
+        }
     }
 
     void help(std::ostream& output)
@@ -237,6 +382,25 @@ namespace
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2) {
+        const std::string_view argument(argv[1]);
+        if (argument == "-h" || argument == "--help") {
+            help(std::cout);
+            return 0;
+        }
+        if (argument != "--generate-inputs") {
+            std::cerr << "Invalid arguments.\n\n";
+            help(std::cerr);
+            return 1;
+        }
+        // generateInputs() ON
+        gGenerateInputs = true;
+    }
+    if (argc != 1 && !gGenerateInputs) {
+        std::cerr << "Invalid arguments.\n\n";
+        help(std::cerr);
+        return 1;
+    }
     try {
         AdsrEnvelope envelope;
         for (EnvelopeCurve curve : { EnvelopeCurve::Linear, EnvelopeCurve::Exponential })
@@ -289,6 +453,9 @@ int main(int argc, char* argv[])
                 0.0,    // sustainSeconds
                 0.0     // releaseSeconds
             );
+            if (gGenerateInputs) {
+                std::cout << "CSV generation complete." << std::endl;
+            }
         }
     }
     catch (const std::exception& e) {
