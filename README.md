@@ -4,33 +4,70 @@ Score Audio Studio is a music-software portfolio project built around an interna
 
 ## Current status
 
-The Phase 3 — DSP Core development phase is starting on the `phase-3-dsp-core` branch.
+Phase 3 — DSP Core is currently in progress on the `phase-3-dsp-core` branch.
 
 Phase 3 builds on the completed Phase 1 Score Domain and Phase 2 Playback Compiler baselines. Its goal is to introduce a platform-independent C++20 DSP core for sample-accurate note processing, synthesis, polyphony, and basic audio effects.
 
-The planned Phase 3 scope includes:
+Current Phase 3 progress:
 
-- a native C++20 `dsp-core` library
-- block-based stereo float processing
-- block-relative `NoteMessage` input
-- sample-accurate NoteOn and NoteOff handling
-- sine oscillator synthesis
-- ADSR envelope processing
-- polyphonic voice management
-- deterministic voice stealing
-- master gain
-- low-pass filtering
-- soft clipping
-- delay
-- native C++ unit and integration tests
-- real-time safety constraints
-- sanitizer verification
-- offline WAV verification through a separate native host
-- PortAudio realtime playback through a separate native host
+- [x] native C++20 `dsp-core` library and CMake/CTest baseline
+- [x] `PlaybackEvent` contract and `AudioEngine` silence-processing skeleton
+- [x] oscillator implementation
+- [x] ADSR envelope implementation
+- [x] oscillator and ADSR native tests
+- [x] oscillator and ADSR visualization evidence
+- [ ] `Voice`
+- [ ] `VoiceManager` and polyphony
+- [ ] sample-offset event dispatch
+- [ ] deterministic voice stealing
+- [ ] master gain
+- [ ] low-pass filtering
+- [ ] soft clipping
+- [ ] delay
+- [x] ASan/UBSan verification in Debug native tests
+- [ ] offline WAV verification through a separate native host
+- [ ] PortAudio realtime playback through a separate native host
 
 The DSP Core itself will remain independent from `ScoreDocument`, TypeScript package internals, browser APIs, file I/O, and audio-device APIs.
 
 Runtime scheduling, TypeScript-to-C++ adaptation, WebAssembly, AudioWorklet, JUCE/VST3 integration, and score-editor UI belong to later phases.
+
+## Implemented DSP components
+
+### Oscillator
+
+The current oscillator supports:
+
+- Sine
+- Triangle
+- Square
+- Sawtooth
+- additive harmonic synthesis
+- configurable harmonic count up to the internal limit
+- Nyquist filtering of harmonics by default
+- explicit aliasing opt-in for experiments
+- normalized phase wrapping
+- MIDI note number to frequency conversion
+
+The current implementation uses harmonic synthesis rather than PolyBLEP.
+Alternative band-limited oscillator techniques can be evaluated later if
+audio-quality or performance requirements justify them.
+
+### ADSR envelope
+
+The ADSR implementation currently supports:
+
+- `Idle → Attack → Decay → Sustain → Release → Idle`
+- Linear and Exponential curves
+- stage duration quantization from seconds to sample counts
+- sample-count-based stage completion
+- exact target-gain clamping at stage completion
+- release from the current envelope level
+- zero-sample Attack, Decay, and Release transitions
+- consecutive zero-sample stage transitions without consuming audio samples
+
+ADSR behavior is verified through native C++ tests. Test output can also be
+exported as CSV and rendered as envelope graphs for visual verification.
 
 ## Design documentation
 
@@ -93,7 +130,7 @@ cmake --version
 ninja --version
 ```
 
-Once the `dsp-core` skeleton is added, the native build and test loop will use:
+The native DSP Core build and test loop uses:
 
 ```bash
 cmake \
@@ -109,6 +146,12 @@ ctest \
   --output-on-failure
 ```
 
+The same verification sequence is available through:
+
+```bash
+./tools/verify-dsp-core.sh
+```
+
 ## DSP-core design
 
 The Phase 3 responsibility boundary is:
@@ -119,7 +162,7 @@ Score Domain
 Playback Compiler
     ↓ TickPlaybackEvent[] + timing functions
 Runtime / DSP Adapter                  ← later phase
-    ↓ block-relative NoteMessage[]
+    ↓ block-relative PlaybackEvent[]
 DSP Core
     ├── Voice Manager
     │   └── Voice[]
@@ -141,9 +184,21 @@ A later Runtime/DSP Adapter will be responsible for:
 - converting playback timing into block-relative `sampleOffset` values
 - normalizing velocity for DSP input
 - mapping note identity to an opaque numeric `voiceKey`
-- providing already ordered `NoteMessage` values to the DSP Core
+- providing already ordered `PlaybackEvent` values to the DSP Core
 
-During Phase 3, native tests can construct `NoteMessage` values directly without requiring that adapter.
+During Phase 3, native tests can construct `PlaybackEvent` values directly without requiring that adapter.
+
+The current DSP-side event value is intentionally small and platform-independent:
+
+```cpp
+struct PlaybackEvent {
+    PlaybackEventType type;
+    std::uint32_t sampleOffset;
+    std::uint32_t voiceKey;
+    std::uint8_t midiNoteNumber;
+    float velocity;
+};
+```
 
 The initial processing contract is:
 
@@ -170,11 +225,21 @@ DSP Core
 
 Unit and integration tests are added as implementation units are completed rather than being deferred until the end of Phase 3.
 
+Oscillator and ADSR milestones also use lightweight visualization tools as
+supplementary evidence. These visualizations do not replace native correctness
+tests; they make waveform and envelope behavior easier to inspect.
+
+Current evidence includes:
+
+- oscillator visualization
+- ADSR CSV generation
+- Linear and Exponential ADSR envelope plots
+
 Temporary WAV renders may be used during development for debugging oscillator, envelope, and effect behavior. Only representative results need to be retained as final Phase 3 evidence.
 
 The initial CMake/CTest smoke test is an environment check and does not need to remain as final verification evidence.
 
-## Current and planned repository structure
+## Repository structure
 
 ```text
 score-audio-studio/
@@ -188,15 +253,37 @@ score-audio-studio/
 │       ├── src/
 │       └── tests/
 ├── docs/
+│   ├── Adsr-Envelope/
+│   ├── Oscillator/
 │   └── test-evidence/
-├── tools/                      # Development and evidence utilities
+├── tools/                      # Verification and visualization utilities
 ├── package.json
 ├── tsconfig.base.json
 ├── tsconfig.json
 └── vitest.config.ts
 ```
 
-The `dsp-core` structure will be added incrementally as Phase 3 implementation progresses. Generated CMake and Ninja build outputs remain outside the source tree under `build/`.
+The `dsp-core` structure continues to grow incrementally as Phase 3 implementation progresses. Generated CMake and Ninja build outputs remain outside the source tree under `build/`.
+
+## Next Phase 3 milestones
+
+The immediate implementation sequence is:
+
+```text
+Oscillator       completed
+    ↓
+ADSR             completed
+    ↓
+Voice            next
+    ↓
+VoiceManager / polyphony
+    ↓
+sample-offset event dispatch
+    ↓
+Gain / LPF / Soft Clip / Delay
+    ↓
+integrated native verification
+```
 
 ## Current boundary
 
