@@ -258,4 +258,9 @@ float AdsrEnvelope::getGain() noexcept
     return gain_;
 }  // AdsrEnvelope::getGain
 
+bool AdsrEnvelope::isIdle() noexcept
+{
+    return stage_ == EnvelopeStage::Idle;
+}  // AdsrEnvelope::isIdle
+
 }  // namespace score_audio_studio::dsp

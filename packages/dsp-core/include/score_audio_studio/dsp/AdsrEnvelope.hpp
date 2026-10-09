@@ -65,6 +65,7 @@ public:
     void clear() noexcept;
 
     [[nodiscard]] float getGain() noexcept;
+    [[nodiscard]] bool isIdle() noexcept;
 
 private:
     StageFeatures adsrSettings_[5]{};
