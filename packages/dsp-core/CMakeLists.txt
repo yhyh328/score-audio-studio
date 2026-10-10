@@ -30,6 +30,9 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
             -Wall
             -Wextra
             -Wpedantic
+            -Wconversion
+            -Wsign-conversion
+            -Wshadow
     )
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_compile_options(score_audio_studio_dsp_core

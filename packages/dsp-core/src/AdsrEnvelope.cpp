@@ -118,7 +118,20 @@ void AdsrEnvelope::prepare(
 
     for (std::size_t i = 1; i < 5; ++i) {
         const double seconds = adsrSettings_[i].seconds;
-        adsrSamples_[i] = std::round(sampleRate_ * seconds);
+        const double roundedSamples = std::round(
+            sampleRate_ * seconds
+        );
+        assert(std::isfinite(roundedSamples));
+        assert(0.0 <= roundedSamples);
+        assert
+        (
+            roundedSamples <= static_cast<double>(
+                std::numeric_limits<std::uint32_t>::max()
+            )
+        );
+        adsrSamples_[i] = static_cast<std::uint32_t>(
+            roundedSamples
+        );
     }
 }  // AdsrEnvelope::prepare
 

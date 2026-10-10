@@ -20,9 +20,7 @@ namespace
     constexpr float kAttackTargetGain = 0.9f,
                     kDecayTargetGain  = 0.6f;
 
-    bool gLinear         = false,
-         gExponential    = false,
-         gGenerateInputs = false;
+    bool gGenerateInputs = false;
     
     void generateInputs
     (
@@ -124,7 +122,7 @@ namespace
                   << std::endl;
     }  // generateInputs
 
-    constexpr float kTolerance = 1e-6;
+    constexpr float kTolerance = 1.0e-6f;
 
     void runAdsrScenario(
         AdsrEnvelope& envelope,
@@ -164,6 +162,8 @@ namespace
             static_cast<std::uint32_t>(std::round(kSampleRate * releaseSeconds));
 
         switch (curve) {
+            case EnvelopeCurve::None:
+                break;
             case EnvelopeCurve::Linear:
                 std::cout << "Testing ADSR envelope with a linear curve..."
                           << std::endl;

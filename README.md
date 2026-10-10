@@ -24,6 +24,7 @@ Current Phase 3 progress:
 - [ ] low-pass filtering
 - [ ] soft clipping
 - [ ] delay
+- [x] strict compiler warnings for native library and tests
 - [x] ASan/UBSan verification in Debug native tests
 - [ ] offline WAV verification through a separate native host
 - [ ] PortAudio realtime playback through a separate native host

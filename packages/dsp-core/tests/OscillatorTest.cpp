@@ -185,8 +185,10 @@ namespace {
         SampleBuffer samples = generateSamples(osc);
 
         const double frequency = osc.getFrequency();
-        const std::uint32_t circle = kSampleRate / frequency;   // 256
-        const std::uint32_t quarterCycleSamples = circle / 4;   // 64
+        const std::uint32_t circle = // 256
+            static_cast<std::uint32_t>(kSampleRate / frequency);
+        const std::uint32_t quarterCycleSamples = // 64
+            static_cast<std::uint32_t>(circle / 4);
 
         // not spun or spun 360 degree
         double spin000 = samples[quarterCycleSamples * 0];
@@ -246,8 +248,10 @@ namespace {
             SampleBuffer samples = generateSamples(osc);
 
             const double frequency = osc.getFrequency();
-            const std::uint32_t circle = kSampleRate / frequency;   // 256
-            const std::uint32_t quarterCycleSamples = circle / 4;   // 64
+            const std::uint32_t circle = // 256
+                static_cast<std::uint32_t>(kSampleRate / frequency);
+            const std::uint32_t quarterCycleSamples = // 64
+                static_cast<std::uint32_t>(circle / 4);
 
             // not spun or spun 360 degree
             double spin000 = samples[quarterCycleSamples * 0];
@@ -401,8 +405,10 @@ namespace {
             SampleBuffer samples = generateSamples(osc);
 
             const double frequency = osc.getFrequency();
-            const std::uint32_t circle = kSampleRate / frequency;   // 256
-            const std::uint32_t quarterCycleSamples = circle / 4;   // 64
+            const std::uint32_t circle = // 256
+                static_cast<std::uint32_t>(kSampleRate / frequency);
+            const std::uint32_t quarterCycleSamples = // 64
+                static_cast<std::uint32_t>(circle / 4);
 
             // not spun or spun 360 degree
             double spin000 = samples[quarterCycleSamples * 0];

@@ -7,7 +7,9 @@ cmake \
   -G Ninja \
   -DCMAKE_BUILD_TYPE=Debug
 
-cmake --build build/dsp-core
+cmake \
+  --build build/dsp-core \
+  --clean-first
 
 ctest \
   --test-dir build/dsp-core \

@@ -5,6 +5,19 @@ function(add_dsp_test target source)
         ${target}
         PRIVATE score_audio_studio::dsp_core
     )
+
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(${target}
+            PRIVATE
+                -Wall
+                -Wextra
+                -Wpedantic
+                -Wconversion
+                -Wsign-conversion
+                -Wshadow
+        )
+    endif()
+
     if(
         CMAKE_BUILD_TYPE STREQUAL "Debug"
         AND
