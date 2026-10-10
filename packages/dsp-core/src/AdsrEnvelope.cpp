@@ -253,12 +253,12 @@ void AdsrEnvelope::clear() noexcept
     reset();
 }  // AdsrEnvelope::clear
 
-float AdsrEnvelope::getGain() noexcept
+float AdsrEnvelope::getGain() const noexcept
 {
     return gain_;
 }  // AdsrEnvelope::getGain
 
-bool AdsrEnvelope::isIdle() noexcept
+bool AdsrEnvelope::isIdle() const noexcept
 {
     return stage_ == EnvelopeStage::Idle;
 }  // AdsrEnvelope::isIdle

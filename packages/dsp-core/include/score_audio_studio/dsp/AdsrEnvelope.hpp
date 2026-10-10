@@ -64,8 +64,8 @@ public:
     // Clears all attack, decay, sustain, and release settings.
     void clear() noexcept;
 
-    [[nodiscard]] float getGain() noexcept;
-    [[nodiscard]] bool isIdle() noexcept;
+    [[nodiscard]] float getGain() const noexcept;
+    [[nodiscard]] bool isIdle() const noexcept;
 
 private:
     StageFeatures adsrSettings_[5]{};
