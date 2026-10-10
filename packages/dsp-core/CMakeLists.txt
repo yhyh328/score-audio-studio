@@ -9,6 +9,7 @@ add_library(score_audio_studio_dsp_core STATIC
     src/AudioEngine.cpp
     src/Oscillator.cpp
     src/AdsrEnvelope.cpp
+    src/Voice.cpp
 )
 
 add_library(score_audio_studio::dsp_core
