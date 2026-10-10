@@ -16,7 +16,7 @@ Current Phase 3 progress:
 - [x] ADSR envelope implementation
 - [x] oscillator and ADSR native tests
 - [x] oscillator and ADSR visualization evidence
-- [ ] `Voice`
+- [x] `Voice`
 - [ ] `VoiceManager` and polyphony
 - [ ] sample-offset event dispatch
 - [ ] deterministic voice stealing
