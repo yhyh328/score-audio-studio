@@ -17,7 +17,7 @@ Current Phase 3 progress:
 - [x] oscillator and ADSR native tests
 - [x] oscillator and ADSR visualization evidence
 - [x] `Voice`
-- [ ] `VoiceManager` and polyphony
+- [x] `VoiceManager` and polyphony
 - [ ] sample-offset event dispatch
 - [ ] deterministic voice stealing
 - [ ] master gain

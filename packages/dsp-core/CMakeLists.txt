@@ -10,6 +10,7 @@ add_library(score_audio_studio_dsp_core STATIC
     src/Oscillator.cpp
     src/AdsrEnvelope.cpp
     src/Voice.cpp
+    src/VoiceManager.cpp
 )
 
 add_library(score_audio_studio::dsp_core
