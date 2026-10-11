@@ -154,7 +154,6 @@ void Oscillator::wrapPhase() noexcept
 void Oscillator::reset() noexcept
 {
     phase_ = 0.0;
-    allowAliasing_ = false;
 }  // Oscillator::reset
 
 void Oscillator::setAllowAliasing(bool enabled) noexcept
