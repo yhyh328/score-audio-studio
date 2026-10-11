@@ -15,7 +15,6 @@ enum class PlaybackEventType : std::uint8_t {
 struct PlaybackEvent {
     PlaybackEventType type;
     std::uint32_t sampleOffset;
-    std::uint32_t voiceKey;
     std::uint8_t midiNoteNumber;
     float velocity;
 };
