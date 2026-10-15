@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - phase-3-dsp-core
+      - phase-2-5-playback-runtime
 
   pull_request:
     branches:
@@ -42,4 +42,4 @@ jobs:
           sudo apt-get install -y build-essential cmake ninja-build
 
       - name: Verify DSP Core
-        run: ./tools/verify-dsp-core.sh
+        run: ./tools/verify-playback-runtime.sh

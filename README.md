@@ -1,306 +1,195 @@
-# Score Audio Studio
+# @score-audio-studio/playback-runtime
 
-Score Audio Studio is a music-software portfolio project built around an internal score model. The score model is the source of truth; formats such as MIDI and MusicXML will be handled by adapters instead of defining the domain model.
+Runtime adapter layer between the Phase 2 Playback Compiler and the Phase 3 DSP Core.
 
-## Current status
+## Introduction
 
-Phase 3 — DSP Core is currently in progress on the `phase-3-dsp-core` branch.
+Playback Runtime was introduced while integrating Phase 2 with the Phase 3 DSP Core.
 
-Phase 3 builds on the completed Phase 1 Score Domain and Phase 2 Playback Compiler baselines. Its goal is to introduce a platform-independent C++20 DSP core for sample-accurate note processing, synthesis, polyphony, and basic audio effects.
+The original design assumed that Playback Compiler output could be consumed directly by the DSP Core. During the implementation of `AudioEngine`, `VoiceManager`, and sample-accurate event dispatch, however, a separate runtime layer became necessary to handle responsibilities such as:
 
-Current Phase 3 progress:
+- tick-to-frame conversion
+- block-relative event scheduling
+- part-to-instrument routing
+- runtime event generation
 
-- [x] native C++20 `dsp-core` library and CMake/CTest baseline
-- [x] `PlaybackEvent` contract and `AudioEngine` silence-processing skeleton
-- [x] oscillator implementation
-- [x] ADSR envelope implementation
-- [x] oscillator and ADSR native tests
-- [x] oscillator and ADSR visualization evidence
-- [x] `Voice`
-- [x] `VoiceManager` and polyphony
-- [ ] sample-offset event dispatch
-- [ ] deterministic voice stealing
-- [ ] master gain
-- [ ] low-pass filtering
-- [ ] soft clipping
-- [ ] delay
-- [x] strict compiler warnings for native library and tests
-- [x] ASan/UBSan verification in Debug native tests
-- [ ] offline WAV verification through a separate native host
-- [ ] PortAudio realtime playback through a separate native host
+These responsibilities are too runtime-oriented for the Playback Compiler and too dependent on compiler-level information for the DSP Core.
 
-The DSP Core itself will remain independent from `ScoreDocument`, TypeScript package internals, browser APIs, file I/O, and audio-device APIs.
+For this reason, the layer was extracted as **Phase 2.5 — Playback Runtime**.
 
-Runtime scheduling, TypeScript-to-C++ adaptation, WebAssembly, AudioWorklet, JUCE/VST3 integration, and score-editor UI belong to later phases.
+## Phase
 
-## Implemented DSP components
-
-### Oscillator
-
-The current oscillator supports:
-
-- Sine
-- Triangle
-- Square
-- Sawtooth
-- additive harmonic synthesis
-- configurable harmonic count up to the internal limit
-- Nyquist filtering of harmonics by default
-- explicit aliasing opt-in for experiments
-- normalized phase wrapping
-- MIDI note number to frequency conversion
-
-The current implementation uses harmonic synthesis rather than PolyBLEP.
-Alternative band-limited oscillator techniques can be evaluated later if
-audio-quality or performance requirements justify them.
-
-### ADSR envelope
-
-The ADSR implementation currently supports:
-
-- `Idle → Attack → Decay → Sustain → Release → Idle`
-- Linear and Exponential curves
-- stage duration quantization from seconds to sample counts
-- sample-count-based stage completion
-- exact target-gain clamping at stage completion
-- release from the current envelope level
-- zero-sample Attack, Decay, and Release transitions
-- consecutive zero-sample stage transitions without consuming audio samples
-
-ADSR behavior is verified through native C++ tests. Test output can also be
-exported as CSV and rendered as envelope graphs for visual verification.
-
-## Design documentation
-
-The linked Notion documents are currently maintained primarily in Korean. English versions will be provided later for international reviewers.
-
-- [Architecture overview — Korean](https://app.notion.com/p/3a14b2f5a3b0818eb209f90e79bc229e)
-- [Phase design index — Korean](https://app.notion.com/p/3c04b2f5a3b0801189c5df2121310ab0)
-- [Phase 3 basic design: DSP Core — Korean](https://app.notion.com/p/3c74b2f5a3b0818f8b59d388f2b81619)
-- [Phase 3 detailed design: DSP Core — Korean](https://app.notion.com/p/3c74b2f5a3b081d08523f155fdb48aef)
-- [Phase 3 environment setup — Korean](https://app.notion.com/p/3c74b2f5a3b0815bb095f024ff8f08dc)
-
-## Requirements
-
-Existing TypeScript baseline:
-
-- Node.js 24.18.0 (pinned in `.nvmrc`)
-- npm 11.16.0 (pinned by the root `packageManager` field)
-
-Phase 3 native development:
-
-- Windows 11 + WSL2 Ubuntu
-- a C++20-capable GCC or Clang compiler
-- CMake
-- Ninja
-- CTest
-
-A specific compiler major version is not pinned at the start of Phase 3. The actual toolchain baseline can be fixed later when reproducibility requirements are confirmed.
-
-## Setup and verification
-
-Install the existing JavaScript dependencies:
-
-```bash
-npm ci
-```
-
-Run the existing Phase 1 and Phase 2 verification baseline:
-
-```bash
-npm run typecheck
-npm test
-npm run build
-```
-
-Install the native Phase 3 toolchain on WSL2 Ubuntu:
-
-```bash
-sudo apt update
-sudo apt install -y \
-  build-essential \
-  cmake \
-  ninja-build
-```
-
-Verify the native tools:
-
-```bash
-g++ --version
-cmake --version
-ninja --version
-```
-
-The native DSP Core build and test loop uses:
-
-```bash
-cmake \
-  -S packages/dsp-core \
-  -B build/dsp-core \
-  -G Ninja \
-  -DCMAKE_BUILD_TYPE=Debug
-
-cmake --build build/dsp-core
-
-ctest \
-  --test-dir build/dsp-core \
-  --output-on-failure
-```
-
-The same verification sequence is available through:
-
-```bash
-./tools/verify-dsp-core.sh
-```
-
-## DSP-core design
-
-The Phase 3 responsibility boundary is:
+**Phase 2.5 — Playback Runtime**
 
 ```text
 Score Domain
     ↓
 Playback Compiler
-    ↓ TickPlaybackEvent[] + timing functions
-Runtime / DSP Adapter                  ← later phase
-    ↓ block-relative PlaybackEvent[]
-DSP Core
-    ├── Voice Manager
-    │   └── Voice[]
-    │       ├── Oscillator
-    │       └── ADSR
-    └── Effect Chain
-        ├── Master Gain
-        ├── Low-pass Filter
-        ├── Soft Clip
-        └── Delay
     ↓
-stereo float audio buffers
+Playback Runtime
+    ↓
+DSP Core / AudioEngine
 ```
 
-The DSP Core does not interpret score ticks, tempo maps, absolute sample positions, or score entity IDs.
+The Playback Compiler represents musical time using ticks.
 
-A later Runtime/DSP Adapter will be responsible for:
+The DSP Core processes audio using frames and block-relative event offsets.
 
-- converting playback timing into block-relative `sampleOffset` values
-- normalizing velocity for DSP input
-- mapping note identity to an opaque numeric `voiceKey`
-- providing already ordered `PlaybackEvent` values to the DSP Core
+This package bridges those two representations.
 
-During Phase 3, native tests can construct `PlaybackEvent` values directly without requiring that adapter.
+## Design documentation
 
-The current DSP-side event value is intentionally small and platform-independent:
+The linked Notion documents are currently maintained primarily in Korean. English versions will be provided later for international reviewers.
 
-```cpp
-struct PlaybackEvent {
-    PlaybackEventType type;
-    std::uint32_t sampleOffset;
-    std::uint32_t voiceKey;
-    std::uint8_t midiNoteNumber;
-    float velocity;
-};
-```
+- [Phase 2.5 playback runtime design](https://app.notion.com/p/Phase-2-5-Playback-Runtime-3fa4b2f5a3b08193b3e4e1336f4ecfc9)
 
-The initial processing contract is:
+## Responsibilities
+
+The Playback Runtime is responsible for converting compiler output into data that can be consumed by the realtime audio engine.
+
+Planned responsibilities include:
+
+- converting tick positions to absolute frame positions
+- converting absolute frame positions to block-relative event offsets
+- mapping score/compiler part identifiers to runtime instrument indices
+- selecting events that belong to the current audio block
+- preserving deterministic event ordering
+- producing runtime playback events for the DSP Core
+
+## Time Representation
+
+Phase 2 uses musical time:
 
 ```text
-0 <= sampleOffset < frameCount
-frameCount <= maximumBlockSize
+tick
 ```
 
-`maximumBlockSize` represents the maximum number of frames accepted by one `process()` call, not the number of blocks.
+Tick positions depend on:
 
-The real-time processing path will avoid heap allocation, blocking operations, console logging, file I/O, mutex waits, and exceptions.
+- PPQ
+- tempo map
 
-### Native verification
-
-Audio-device and file-I/O concerns remain outside `dsp-core`.
-
-A separate native verification host will later be used for:
+Phase 3 uses audio time:
 
 ```text
-DSP Core
-├── offline WAV rendering
-└── PortAudio realtime playback
+frame
 ```
 
-Unit and integration tests are added as implementation units are completed rather than being deferred until the end of Phase 3.
+Frame positions additionally depend on:
 
-Oscillator and ADSR milestones also use lightweight visualization tools as
-supplementary evidence. These visualizations do not replace native correctness
-tests; they make waveform and envelope behavior easier to inspect.
+- sample rate
 
-Current evidence includes:
-
-- oscillator visualization
-- ADSR CSV generation
-- Linear and Exponential ADSR envelope plots
-
-Temporary WAV renders may be used during development for debugging oscillator, envelope, and effect behavior. Only representative results need to be retained as final Phase 3 evidence.
-
-The initial CMake/CTest smoke test is an environment check and does not need to remain as final verification evidence.
-
-## Repository structure
+Example:
 
 ```text
-score-audio-studio/
-├── apps/                       # Future application packages
-├── packages/
-│   ├── score-domain/           # Phase 1 domain model and validation
-│   ├── playback-compiler/      # Phase 2 playback compilation and timing
-│   └── dsp-core/               # Phase 3 C++20 DSP Core
-│       ├── CMakeLists.txt
-│       ├── include/
-│       ├── src/
-│       └── tests/
-├── docs/
-│   ├── Adsr-Envelope/
-│   ├── Oscillator/
-│   └── test-evidence/
-├── tools/                      # Verification and visualization utilities
-├── package.json
-├── tsconfig.base.json
-├── tsconfig.json
-└── vitest.config.ts
+PPQ: 480
+Tempo: 120 BPM
+Sample rate: 48,000 Hz
+
+480 ticks
+→ 0.5 seconds
+→ 24,000 frames
 ```
 
-The `dsp-core` structure continues to grow incrementally as Phase 3 implementation progresses. Generated CMake and Ninja build outputs remain outside the source tree under `build/`.
+## Block-relative Event Offset
 
-## Next Phase 3 milestones
-
-The immediate implementation sequence is:
+A runtime playback event contains an offset relative to the beginning of the current audio block.
 
 ```text
-Oscillator       completed
-    ↓
-ADSR             completed
-    ↓
-Voice            next
-    ↓
-VoiceManager / polyphony
-    ↓
-sample-offset event dispatch
-    ↓
-Gain / LPF / Soft Clip / Delay
-    ↓
-integrated native verification
+Audio block: 512 frames
+
+0 ---------------- 100 ---------------- 300 ---------------- 511
+                  NoteOn              NoteOff
 ```
 
-## Current boundary
+In this example:
 
-Phase 3 focuses on the reusable native DSP layer.
+```ini
+NoteOn.sampleOffset  = 100
+NoteOff.sampleOffset = 300
+```
 
-The following remain outside the `dsp-core` responsibility:
+Although the field is currently named `sampleOffset`, its unit is a **block-relative frame offset**.
 
-- `ScoreDocument` interpretation
-- tick, tempo, seconds, and absolute sample-position calculation
-- TypeScript-to-C++ runtime scheduling
-- Web Audio API and AudioWorklet integration
-- WebAssembly bindings
-- JUCE and VST3 integration
-- MIDI and MusicXML parsing
-- transport look-ahead scheduling
-- direct audio-device control
-- WAV or other audio-file I/O
+One frame contains one sample per channel.
 
-PortAudio realtime playback and offline WAV rendering may be used for Phase 3 verification, but they remain separate from the DSP Core library.
+## Event Ordering
+
+When multiple events occur at the same position, the runtime preserves the Phase 2 tie-break policy:
+
+```text
+noteOff
+before
+noteOn
+```
+
+This allows an existing note to be released before another note begins at the same frame.
+
+## Instrument Routing
+
+Phase 2 identifies musical parts using logical identifiers such as `partId`.
+
+The DSP Core should not depend directly on those score-domain identifiers.
+
+The runtime layer therefore converts them into runtime routing information.
+
+```text
+partId
+    ↓
+instrumentIndex
+```
+
+Example:
+
+```text
+"violin-1" → 0
+"cello"    → 1
+```
+
+The resulting `instrumentIndex` can be used by `AudioEngine` to route an event to the appropriate instrument.
+
+## Non-responsibilities
+
+This package does not perform DSP or audio rendering.
+
+It does not implement:
+
+- oscillators
+- envelopes
+- voice rendering
+- voice allocation
+- effects
+- audio-device I/O
+- JUCE, PortAudio, or Unreal-specific processing
+
+Those responsibilities belong to the DSP Core or platform integration layers.
+
+## Current Status
+
+Work in progress.
+
+Initial goals:
+
+- define the Phase 2 → runtime input boundary
+- implement tick-to-frame conversion
+- implement block-relative event conversion
+- implement part-to-instrument routing
+- preserve deterministic event ordering
+- define the minimal runtime playback event contract
+- add unit tests
+
+## Playback-runtime design
+The minimal Phase 2.5 compilation and timing flow is:
+```text
+packages/playback-runtime/
+├── CMakeLists.txt
+├── include/
+│   └── score_audio_studio/
+│       └── playback_runtime/
+│           └── PlaybackRuntime.hpp
+├── src/
+│   └── PlaybackRuntime.cpp
+└── tests/
+    ├── CMakeLists.txt
+    └── PlaybackRuntimeTest.cpp
+```
