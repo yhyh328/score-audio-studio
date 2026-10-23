@@ -37,11 +37,31 @@ The DSP Core processes audio using frames and block-relative event offsets.
 
 This package bridges those two representations.
 
+To enable `dsp-core` to consume playback events directly from memory
+without recalculating playback timing, the Phase 2 `playback-compiler`
+package provides `encodePlaybackEvents`.
+
+## Required Phase 2 extension
+
+Although Playback Runtime belongs to Phase 2.5 and is implemented in C++,
+establishing the TypeScript-to-C++ boundary required a minimal extension
+to the Phase 2 playback compiler.
+
+Phase 2 now converts score events into absolute sample-position events,
+normalizes domain identifiers into fixed-width numeric fields, and encodes
+the result using the 16-byte little-endian binary layout consumed by the
+native runtime.
+
+This extension is limited to producing the handoff format. Binary loading,
+event ownership, block scheduling, and delivery to the DSP engine remain
+the responsibility of Phase 2.5.
+
 ## Design documentation
 
 The linked Notion documents are currently maintained primarily in Korean. English versions will be provided later for international reviewers.
 
 - [Phase 2.5 playback runtime design](https://app.notion.com/p/Phase-2-5-Playback-Runtime-3fa4b2f5a3b08193b3e4e1336f4ecfc9)
+- [Phase 2(Playback Compiler) verification results — 299 tests](docs/test-evidence/test-evidence-20261023-214043.md)
 
 ## Responsibilities
 

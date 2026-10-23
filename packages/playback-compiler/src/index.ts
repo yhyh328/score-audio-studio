@@ -1,5 +1,5 @@
 // Compiler
-export * from "./compiler/compileScoreToTicks";
+export * from "./compiler/compileScoreToSamplePositions";
 
 // Model
 export * from "./model/playbackEvent";
