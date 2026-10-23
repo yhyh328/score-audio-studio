@@ -7,6 +7,9 @@ import {
 } from "../../src/compiler/encodePlaybackEvents";
 
 describe("writeBinaryFile", () => {
+    const TMP_SAMPLE_RATE: number = 48000;
+    const HEADER_SIZE: number = 24;
+    const EVENT_SIZE: number = 16;
     const LITTLE_ENDIAN: boolean = true;
     let [ noteId, partId ]: number[] = [
         0x00_00_00_00,
@@ -31,14 +34,53 @@ describe("writeBinaryFile", () => {
                 noteId: noteId!,
                 partId: partId!
             }];
-            const bytes = encodePlaybackEvents(events);
-            expect(bytes.byteLength).toBe(16 * events.length);
+            const bytes = encodePlaybackEvents(
+                events,
+                TMP_SAMPLE_RATE
+            );
+            expect(bytes.byteLength).toBe(
+                HEADER_SIZE + EVENT_SIZE * events.length
+            );
             const view = new DataView(
                 bytes.buffer,
                 bytes.byteOffset,
                 bytes.byteLength
             );
-            let offset = 0;
+            // magic
+            expect(
+                view.getUint8(0)
+            ).toBe(0x53);
+            expect(
+                view.getUint8(1)
+            ).toBe(0x41);
+            expect(
+                view.getUint8(2)
+            ).toBe(0x53);
+            expect(
+                view.getUint8(3)
+            ).toBe(0x42);
+            // version
+            expect(
+                view.getUint16(4, LITTLE_ENDIAN)
+            ).toBe(1);
+            // header size
+            expect(
+                view.getUint16(6, LITTLE_ENDIAN)
+            ).toBe(HEADER_SIZE);
+            // sample rate
+            expect(
+                view.getFloat64(8, LITTLE_ENDIAN)
+            ).toBe(TMP_SAMPLE_RATE);
+            // event count
+            expect(
+                view.getUint32(16, LITTLE_ENDIAN)
+            ).toBe(events.length);
+            // event size
+            expect(
+                view.getUint32(20, LITTLE_ENDIAN)
+            ).toBe(EVENT_SIZE);
+            // playback events
+            let offset = HEADER_SIZE;
             for (let i = 0; i < events.length; i++) {
                 expect(
                     view.getUint8(offset + 0)
@@ -58,7 +100,7 @@ describe("writeBinaryFile", () => {
                 expect(
                     view.getFloat32(offset + 12, LITTLE_ENDIAN)
                 ).toBe(events[i]!.velocity);
-                offset += 16;
+                offset += EVENT_SIZE;
             }
         }
     );

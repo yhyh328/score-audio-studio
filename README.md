@@ -56,12 +56,63 @@ This extension is limited to producing the handoff format. Binary loading,
 event ownership, block scheduling, and delivery to the DSP engine remain
 the responsibility of Phase 2.5.
 
+## In-memory playback buffer format
+
+Phase 2 produces a `Uint8Array` containing playback events in a fixed binary
+layout. Phase 2.5 reads this buffer directly and forwards the decoded events to
+the native playback runtime.
+
+All multi-byte values use little-endian byte order.
+
+### Buffer layout
+
+| Offset | Size | Type | Field | Description |
+|---:|---:|---|---|---|
+| 0 | 4 | ASCII | `magic` | Format identifier: `"SASB"` |
+| 4 | 2 | `uint16` | `version` | Binary format version |
+| 6 | 2 | `uint16` | `headerSize` | Byte offset of the first playback event |
+| 8 | 8 | `float64` | `sampleRate` | Sample rate used to calculate sample positions |
+| 16 | 4 | `uint32` | `eventCount` | Number of playback events |
+| 20 | 4 | `uint32` | `eventSize` | Size of one playback event in bytes |
+| 24 | `eventCount × eventSize` | — | `events` | Contiguous playback event records |
+
+For format version 1:
+
+```text
+headerSize = 24
+eventSize  = 16
+bufferSize = headerSize + eventCount × eventSize
+```
+
+### Playback event layout
+
+Each playback event occupies exactly 16 bytes without additional padding.
+
+| Event offset | Size | Type | Field |
+|---:|---:|---|---|
+| 0 | 1 | `uint8` | Event type |
+| 1 | 1 | `uint8` | MIDI note number |
+| 2 | 2 | `uint16` | Part ID |
+| 4 | 4 | `uint32` | Note ID |
+| 8 | 4 | `uint32` | Absolute sample position |
+| 12 | 4 | `float32` | Velocity |
+
+The byte offset of event `i` is calculated as follows:
+
+```text
+eventOffset = headerSize + i × eventSize
+```
+
+Before reading the event records, the native runtime must validate the magic
+value, format version, header size, event size, event count, and total buffer
+size.
+
 ## Design documentation
 
 The linked Notion documents are currently maintained primarily in Korean. English versions will be provided later for international reviewers.
 
 - [Phase 2.5 playback runtime design](https://app.notion.com/p/Phase-2-5-Playback-Runtime-3fa4b2f5a3b08193b3e4e1336f4ecfc9)
-- [Phase 2(Playback Compiler) verification results — 299 tests](docs/test-evidence/test-evidence-20261023-214043.md)
+- [Phase 2(Playback Compiler) verification results — 299 tests](docs/test-evidence/test-evidence-20261023-233032.md)
 
 ## Responsibilities
 
@@ -110,6 +161,8 @@ Sample rate: 48,000 Hz
 → 0.5 seconds
 → 24,000 frames
 ```
+
+
 
 ## Block-relative Event Offset
 
