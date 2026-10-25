@@ -112,7 +112,7 @@ size.
 The linked Notion documents are currently maintained primarily in Korean. English versions will be provided later for international reviewers.
 
 - [Phase 2.5 playback runtime design](https://app.notion.com/p/Phase-2-5-Playback-Runtime-3fa4b2f5a3b08193b3e4e1336f4ecfc9)
-- [Phase 2(Playback Compiler) verification results — 299 tests](docs/test-evidence/test-evidence-20261023-233032.md)
+- [Phase 2(Playback Compiler) verification results — 299 tests](docs/test-evidence/test-evidence-20261025-204654.md)
 
 ## Responsibilities
 
