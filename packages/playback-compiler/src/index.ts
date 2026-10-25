@@ -1,10 +1,11 @@
 // Compiler
-export * from "./compiler/compileScoreToSamplePositions";
+export * from "./compiler/compileScoreToBuffer.js";
+export * from "./compiler/compileScoreToSamplePositions.js";
 
 // Model
-export * from "./model/playbackEvent";
-export * from "./model/tempoSegment";
+export * from "./model/playbackEvent.js";
+export * from "./model/tempoSegment.js";
 
 // Timing
-export * from "./timing/buildTempoSegments";
-export * from "./timing/tickToSamplePosition";
+export * from "./timing/buildTempoSegments.js";
+export * from "./timing/tickToSamplePosition.js";

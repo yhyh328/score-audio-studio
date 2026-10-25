@@ -1,7 +1,7 @@
 import type {
     SamplePlaybackEvent,
     BinaryPlaybackEvent
-} from '../model/playbackEvent';
+} from '../model/playbackEvent.js';
 
 function newType(type: string): number {
     return (type == "noteOff") ? 0 : 1;
@@ -38,6 +38,10 @@ function newPartId(partId: string): number {
     return val;
 }
 
+function newVelocity(velocity: number): number {
+    return velocity / 0x7f;
+}
+
 export function compileSamplePositionsToBinary(
     samplePlaybackEvents: SamplePlaybackEvent[]
 ): BinaryPlaybackEvent[] {
@@ -47,6 +51,7 @@ export function compileSamplePositionsToBinary(
                 type: _,
                 noteId: __,
                 partId: ___,
+                velocity: ____,
                 ...baseEvent
             } = event;
             const type = newType(
@@ -58,11 +63,15 @@ export function compileSamplePositionsToBinary(
             const partId = newPartId(
                 event.partId
             );
+            const velocity = newVelocity(
+                event.velocity
+            );
             return {
                 ...baseEvent,
                 type: type,
                 noteId: noteId,
-                partId: partId
+                partId: partId,
+                velocity: velocity
             } as BinaryPlaybackEvent;
         }
     );

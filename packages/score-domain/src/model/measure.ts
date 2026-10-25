@@ -1,6 +1,6 @@
-import type { EntityId }   from "./entityId";					
-import type { ScoreEvent } from "./scoreEvent";
-import type { TimeSignature } from "./timeSignature"	
+import type { EntityId }   from "./entityId.js";
+import type { ScoreEvent } from "./scoreEvent.js";
+import type { TimeSignature } from "./timeSignature.js"
 							
 export interface Measure {					
 	id           	: EntityId;				

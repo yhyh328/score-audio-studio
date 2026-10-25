@@ -1,7 +1,7 @@
-import type { TempoEvent } from "../model/tempo";
-import { isNonNegativeInteger } from "./numberPredicates";
-import { validateTempoEvent } from "./validateTempoEvent";
-import type { ValidationIssue } from "./validationTypes";
+import type { TempoEvent } from "../model/tempo.js";
+import { isNonNegativeInteger } from "./numberPredicates.js";
+import { validateTempoEvent } from "./validateTempoEvent.js";
+import type { ValidationIssue } from "./validationTypes.js";
 
 export function validateTempoMap(
   tempoMap: readonly TempoEvent[], path: string

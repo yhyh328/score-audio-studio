@@ -24,7 +24,7 @@ struct PlaybackEvent {
     std::uint8_t midiNoteNumber;
     std::uint16_t partId;
     std::uint32_t noteId;
-    std::uint32_t sampleOffset;
+    std::uint32_t samplePosition;
     float velocity;
 };
 
@@ -48,7 +48,7 @@ static_assert(
     offsetof(PlaybackEvent, noteId) == 4
 );
 static_assert(
-    offsetof(PlaybackEvent, sampleOffset) == 8
+    offsetof(PlaybackEvent, samplePosition) == 8
 );
 static_assert(
     offsetof(PlaybackEvent, velocity) == 12

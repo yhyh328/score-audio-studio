@@ -1,4 +1,4 @@
-import type { TickPlaybackEvent } from "../model/playbackEvent";
+import type { TickPlaybackEvent } from "../model/playbackEvent.js";
 
 function comparator(
     a: TickPlaybackEvent,

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <span>
 
 #include "score_audio_studio/dsp/AudioEngine.hpp"
 
@@ -26,15 +27,32 @@ int main()
     std::fill_n(right, maxBlockSize, 1.0f);
 
     constexpr std::uint32_t frameCount = 512;
-    constexpr std::uint32_t eventCount = 0;
-    const PlaybackEvent* events = nullptr;
+    constexpr std::uint32_t blockStartFrame = 0;
+    const std::array<PlaybackEvent, 2> events{{
+        {
+            PlaybackEventType::noteOn,
+            60,       // midiNoteNumber
+            1,        // partId
+            1,        // noteId
+            0,        // samplePosition
+            72.0f / 127.0f
+        },
+        {
+            PlaybackEventType::noteOff,
+            60,
+            1,
+            1,
+            frameCount - 1,
+            0.0f
+        }
+    }};
 
     engine.process(
         left,
         right,
         frameCount,
-        events,
-        eventCount
+        blockStartFrame,
+        events
     );
 
     for (std::uint32_t i = 0; i < frameCount; ++i) {

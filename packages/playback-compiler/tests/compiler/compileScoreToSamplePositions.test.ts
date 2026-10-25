@@ -52,6 +52,7 @@ function eventSummaries(
 }
 
 describe("compileTicksToSamplePositions", () => {
+    const SAMPLE_RATE: number = 48_000;
     it("does not compile sample playback events" +
        "if the score invalid.", () => {
         const score = createScore({
@@ -61,13 +62,19 @@ describe("compileTicksToSamplePositions", () => {
             parts: [],
         } as unknown as Partial<ScoreDocument>);
         expect(
-            () => compileScoreToSamplePositions(score),
+            () => compileScoreToSamplePositions(
+                score,
+                SAMPLE_RATE
+            ),
         ).toThrow("Score compilation failed");
     });
     it("compiles sample playback events", () => {
         const score = createScore();
         const result =
-            compileScoreToSamplePositions(score);
+            compileScoreToSamplePositions(
+                score,
+                SAMPLE_RATE
+            );
         expect(eventSummaries(result)).toEqual([{
             type: "noteOn",
             midiNote: 60,

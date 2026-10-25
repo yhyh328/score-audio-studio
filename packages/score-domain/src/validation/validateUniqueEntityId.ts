@@ -1,5 +1,5 @@
-import type { EntityId } from "../model/entityId";
-import type { ValidationIssue } from "./validationTypes";
+import type { EntityId } from "../model/entityId.js";
+import type { ValidationIssue } from "./validationTypes.js";
 
 export function isUniqueEntityId(
   id: EntityId, usedEntityIds: Set<EntityId>): boolean {

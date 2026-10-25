@@ -1,6 +1,6 @@
-import type { TempoEvent } from "../model/tempo";
-import { isNonNegativeInteger } from "./numberPredicates";
-import type { ValidationIssue } from "./validationTypes";
+import type { TempoEvent } from "../model/tempo.js";
+import { isNonNegativeInteger } from "./numberPredicates.js";
+import type { ValidationIssue } from "./validationTypes.js";
 /**
  * These are pragmatic bounds for rejecting implausible input, not limits imposed by music theory or the score format. 
  * They cover ordinary musical tempos while leaving room for unusually slow or fast passages.

@@ -5,27 +5,23 @@ import type {
 import type {
     TickPlaybackEvent,
     SamplePlaybackEvent
-} from "../model/playbackEvent";
+} from "../model/playbackEvent.js";
 import type {
     TempoSegment
-} from '../model/tempoSegment';
+} from '../model/tempoSegment.js';
 import {
     compileScoreToTicks
-} from "./compileScoreToTicks";
+} from "./compileScoreToTicks.js";
 import {
     buildTempoSegments
-} from "../timing/buildTempoSegments";
+} from "../timing/buildTempoSegments.js";
 import {
     tickToSamplePosition
-} from "../timing/tickToSamplePosition";
-
-// I haven't decided yet where users should input TMP_SAMPLE_RATE,
-// so TMP_SAMPLE_RATE is temporarily set in this script.
-// TMP_SAMPLE_RATE might be removed once I decide where it should be configured.
-const TMP_SAMPLE_RATE: number = 48000;
+} from "../timing/tickToSamplePosition.js";
 
 export function compileScoreToSamplePositions(
-    score: ScoreDocument
+    score: ScoreDocument,
+    sampleRate: number
 ): SamplePlaybackEvent[] {
     const compiled = compileScoreToTicks(score);
     if (!compiled.success) {
@@ -49,7 +45,7 @@ export function compileScoreToSamplePositions(
                 ...baseEvent,
                 samplePosition: tickToSamplePosition(
                     event,
-                    TMP_SAMPLE_RATE,
+                    sampleRate,
                     score.ppq,
                     tempoSegments,
                     scoreEndTick

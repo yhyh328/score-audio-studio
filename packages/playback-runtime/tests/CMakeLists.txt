@@ -42,3 +42,11 @@ function(add_playback_runtime_test target source)
 endfunction()
 
 add_playback_runtime_test(library_smoke_test LibrarySmokeTest.cpp)
+add_playback_runtime_test(playback_runtime PlaybackRuntimeTest.cpp)
+
+set_tests_properties(
+    playback_runtime
+    PROPERTIES
+        WORKING_DIRECTORY
+            "${CMAKE_CURRENT_SOURCE_DIR}"
+)

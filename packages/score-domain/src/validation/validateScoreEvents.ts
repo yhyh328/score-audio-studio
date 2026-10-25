@@ -1,19 +1,19 @@
-import type { EntityId } from "../model/entityId";
-import type { Intensity } from "../model/intensity";
-import type { Pitch } from "../model/pitch";
-import type { ScoreEvent } from "../model/scoreEvent";
+import type { EntityId } from "../model/entityId.js";
+import type { Intensity } from "../model/intensity.js";
+import type { Pitch } from "../model/pitch.js";
+import type { ScoreEvent } from "../model/scoreEvent.js";
 import { isNonNegativeInteger,
-         isPositiveInteger } from "./numberPredicates";
-import { validateIntensity } from "./validateIntensity";
-import { validatePitches } from "./validatePitches";
+isPositiveInteger } from "./numberPredicates.js";
+import { validateIntensity } from "./validateIntensity.js";
+import { validatePitches } from "./validatePitches.js";
 import { isUniqueEntityId,
-         entityIdIssue } from "./validateUniqueEntityId";
-import type { ValidationIssue } from "./validationTypes";	
+entityIdIssue } from "./validateUniqueEntityId.js";
+import type { ValidationIssue } from "./validationTypes.js";
 
 export function validateScoreEvents(
-    events: readonly ScoreEvent[], 
+    events: readonly ScoreEvent[],
     measureLengthTicks: number | undefined,
-    path: string, 
+    path: string,
     usedEntityIds: Set<EntityId>
 ): ValidationIssue[] {
 
@@ -25,15 +25,15 @@ export function validateScoreEvents(
         const type = event.type;
         const offsetTicks = event.offsetTicks;
         const durationTicks = event.durationTicks;
-        
+
         if (!isUniqueEntityId(eventId, usedEntityIds)) {
             issues.push(entityIdIssue(eventId, eventPath));
         }
-        let 
-        { 
-            hasValidOffset, hasValidDuration 
-        } = { 
-            hasValidOffset: true, hasValidDuration: true 
+        let
+        {
+            hasValidOffset, hasValidDuration
+        } = {
+            hasValidOffset: true, hasValidDuration: true
         };
         if (!isNonNegativeInteger(offsetTicks)) {
             issues.push({
@@ -42,7 +42,7 @@ export function validateScoreEvents(
                 code: "INVALID_EVENT_OFFSET",
                 message: "Offset Ticks must be a non-negative integer.",
                 path: `${eventPath}.offsetTicks`
-            });	
+            });
             hasValidOffset = false;
         }
         if (!isPositiveInteger(durationTicks)) {

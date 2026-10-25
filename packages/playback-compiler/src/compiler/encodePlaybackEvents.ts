@@ -1,6 +1,6 @@
 import type {
     BinaryPlaybackEvent
-} from "../model/playbackEvent";
+} from "../model/playbackEvent.js";
 
 const HEADER_SIZE: number = 24;
 const EVENT_SIZE: number = 16;
@@ -46,6 +46,19 @@ export function encodePlaybackEvents(
     // playback events
     let offset = HEADER_SIZE;
     events.forEach((event) => {
+        if (
+            !Number.isSafeInteger(event.samplePosition)
+            ||
+            event.samplePosition < 0
+            ||
+            0xff_ff_ff_ff < event.samplePosition
+        ) {
+            throw new RangeError(
+                 `samplePosition must be a uint32: ${
+                    event.samplePosition
+                }`
+            )
+        }
         view.setUint8(
             offset,
             event.type,

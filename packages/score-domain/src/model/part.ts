@@ -1,5 +1,5 @@
-import type { EntityId } from "./entityId";					
-import type { Measure }  from "./measure";					
+import type { EntityId } from "./entityId.js";
+import type { Measure }  from "./measure.js";
 					
 export interface Part {					
 	id      : EntityId;	

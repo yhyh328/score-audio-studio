@@ -1,7 +1,7 @@
-import type { ProjectDocument } from "../model/project";
-import { isValidSchemaVersion } from "./validateSchemaVersion";
-import { validateScoreDocument } from "./validateScoreDocument";
-import type { ValidationIssue, ValidationResult } from "./validationTypes";
+import type { ProjectDocument } from "../model/project.js";
+import { isValidSchemaVersion } from "./validateSchemaVersion.js";
+import { validateScoreDocument } from "./validateScoreDocument.js";
+import type { ValidationIssue, ValidationResult } from "./validationTypes.js";
 
 export function validateProjectDocument(project: ProjectDocument): ValidationResult {
   if (!isValidSchemaVersion("project", project.schemaVersion)) {

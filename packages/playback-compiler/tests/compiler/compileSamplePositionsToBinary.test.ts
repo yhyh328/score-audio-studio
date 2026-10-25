@@ -69,7 +69,8 @@ describe("compileSamplePositionsToBinary", () => {
             // check midiNoteNumber
             expect(sEvent!.midiNote).toBe(bEvent!.midiNote);
             // check velocity
-            expect(sEvent!.velocity).toBe(bEvent!.velocity);
+            expect(Math.fround(sEvent!.velocity / 127))
+            .toBe(Math.fround(bEvent!.velocity));
             // check samplePosition
             expect(sEvent!.samplePosition).toBe(bEvent!.samplePosition);
             // check noteId

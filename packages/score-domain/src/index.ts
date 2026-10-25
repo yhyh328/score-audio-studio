@@ -1,19 +1,19 @@
 // Conversion
-export * from "./conversion/calculateMeasureLengthTicks";
-export * from "./conversion/pitchToMidiNoteNumber";
+export * from "./conversion/calculateMeasureLengthTicks.js";
+export * from "./conversion/pitchToMidiNoteNumber.js";
 
 // Model
-export * from "./model/entityId";
-export * from "./model/intensity";
-export * from "./model/measure";
-export * from "./model/part";
-export * from "./model/pitch";
-export * from "./model/project";
-export * from "./model/score";
-export * from "./model/scoreEvent";
-export * from "./model/tempo";
+export * from "./model/entityId.js";
+export * from "./model/intensity.js";
+export * from "./model/measure.js";
+export * from "./model/part.js";
+export * from "./model/pitch.js";
+export * from "./model/project.js";
+export * from "./model/score.js";
+export * from "./model/scoreEvent.js";
+export * from "./model/tempo.js";
 
 // Validation
-export * from "./validation/validateProjectDocument";
-export * from "./validation/validateScoreDocument";
-export * from "./validation/validationTypes";
+export * from "./validation/validateProjectDocument.js";
+export * from "./validation/validateScoreDocument.js";
+export * from "./validation/validationTypes.js";

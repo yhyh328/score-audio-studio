@@ -1,4 +1,4 @@
-import type { TimeSignature } from "../model/timeSignature";
+import type { TimeSignature } from "../model/timeSignature.js";
 
 /**
  * Calculates a measure's length in ticks from a validated time signature and PPQ.

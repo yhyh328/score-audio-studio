@@ -1,10 +1,10 @@
-import type { EntityId } from "../model/entityId";
-import type { Part } from "../model/part"
-import { validateMeasures } from "./validateMeasures";
+import type { EntityId } from "../model/entityId.js";
+import type { Part } from "../model/part.js"
+import { validateMeasures } from "./validateMeasures.js";
 import { isUniqueEntityId,
-         entityIdIssue } from "./validateUniqueEntityId";
-import type { ValidationIssue } from "./validationTypes";
-import type { TimeSignature } from "../model/timeSignature";
+entityIdIssue } from "./validateUniqueEntityId.js";
+import type { ValidationIssue } from "./validationTypes.js";
+import type { TimeSignature } from "../model/timeSignature.js";
 
 export function validateParts(
     parts: readonly Part[], ppq: number | undefined, path: string): ValidationIssue[] {

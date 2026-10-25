@@ -1,6 +1,6 @@
-import type { Intensity } from "../model/intensity";
-import { isPositiveInteger } from "./numberPredicates";
-import type { ValidationIssue } from "./validationTypes";
+import type { Intensity } from "../model/intensity.js";
+import { isPositiveInteger } from "./numberPredicates.js";
+import type { ValidationIssue } from "./validationTypes.js";
 
 /**
  * MIDI velocity is encoded as a 7-bit data value, so the protocol range is
