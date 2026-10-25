@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "ppq": 480,
+  "tempoMap": [
+    {
+      "tick": 0,
+      "bpm": 120
+    }
+  ],
+  "parts": [
+    {
+      "id": "part-550e8400-e29b-41d4-a716-446655440000",
+      "name": "Piano",
+      "measures": [
+        {
+          "id": "measure-550e8400-e29b-41d4-a716-446655440001",
+          "number": 1,
+          "timeSignature": { "numerator": 4, "denominator": 4 },
+          "events": [
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440101",
+              "offsetTicks": 0,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "C", "alter": 0, "octave": 4 },
+                { "step": "E", "alter": 0, "octave": 4 },
+                { "step": "G", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mf" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440102",
+              "offsetTicks": 480,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "F", "alter": 0, "octave": 3 },
+                { "step": "A", "alter": 0, "octave": 3 },
+                { "step": "C", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mf" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440103",
+              "offsetTicks": 960,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "G", "alter": 0, "octave": 3 },
+                { "step": "B", "alter": 0, "octave": 3 },
+                { "step": "D", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "f" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440104",
+              "offsetTicks": 1440,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "C", "alter": 0, "octave": 4 },
+                { "step": "E", "alter": 0, "octave": 4 },
+                { "step": "G", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mf" }
+            }
+          ]
+        },
+        {
+          "id": "measure-550e8400-e29b-41d4-a716-446655440002",
+          "number": 2,
+          "timeSignature": { "numerator": 4, "denominator": 4 },
+          "events": [
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440201",
+              "offsetTicks": 0,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "A", "alter": 0, "octave": 3 },
+                { "step": "C", "alter": 0, "octave": 4 },
+                { "step": "E", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mp" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440202",
+              "offsetTicks": 480,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "F", "alter": 0, "octave": 3 },
+                { "step": "A", "alter": 0, "octave": 3 },
+                { "step": "C", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mf" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440203",
+              "offsetTicks": 960,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "C", "alter": 0, "octave": 4 },
+                { "step": "E", "alter": 0, "octave": 4 },
+                { "step": "G", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mf" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440204",
+              "offsetTicks": 1440,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "G", "alter": 0, "octave": 3 },
+                { "step": "B", "alter": 0, "octave": 3 },
+                { "step": "D", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "f" }
+            }
+          ]
+        },
+        {
+          "id": "measure-550e8400-e29b-41d4-a716-446655440003",
+          "number": 3,
+          "timeSignature": { "numerator": 4, "denominator": 4 },
+          "events": [
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440301",
+              "offsetTicks": 0,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "F", "alter": 0, "octave": 3 },
+                { "step": "A", "alter": 0, "octave": 3 },
+                { "step": "C", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mf" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440302",
+              "offsetTicks": 480,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "C", "alter": 0, "octave": 4 },
+                { "step": "E", "alter": 0, "octave": 4 },
+                { "step": "G", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mf" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440303",
+              "offsetTicks": 960,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "G", "alter": 0, "octave": 3 },
+                { "step": "B", "alter": 0, "octave": 3 },
+                { "step": "D", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "f" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440304",
+              "offsetTicks": 1440,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "A", "alter": 0, "octave": 3 },
+                { "step": "C", "alter": 0, "octave": 4 },
+                { "step": "E", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mp" }
+            }
+          ]
+        },
+        {
+          "id": "measure-550e8400-e29b-41d4-a716-446655440004",
+          "number": 4,
+          "timeSignature": { "numerator": 4, "denominator": 4 },
+          "events": [
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440401",
+              "offsetTicks": 0,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "C", "alter": 0, "octave": 4 },
+                { "step": "E", "alter": 0, "octave": 4 },
+                { "step": "G", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mf" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440402",
+              "offsetTicks": 480,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "F", "alter": 0, "octave": 3 },
+                { "step": "A", "alter": 0, "octave": 3 },
+                { "step": "C", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mf" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440403",
+              "offsetTicks": 960,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "G", "alter": 0, "octave": 3 },
+                { "step": "B", "alter": 0, "octave": 3 },
+                { "step": "D", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "f" }
+            },
+            {
+              "type": "note",
+              "id": "event-550e8400-e29b-41d4-a716-446655440404",
+              "offsetTicks": 1440,
+              "durationTicks": 480,
+              "pitches": [
+                { "step": "C", "alter": 0, "octave": 4 },
+                { "step": "E", "alter": 0, "octave": 4 },
+                { "step": "G", "alter": 0, "octave": 4 }
+              ],
+              "intensity": { "dynamic": "mf" }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

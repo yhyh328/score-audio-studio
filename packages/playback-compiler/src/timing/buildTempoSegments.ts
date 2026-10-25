@@ -1,6 +1,6 @@
 import type { TempoEvent } from "@score-audio-studio/score-domain";
-import type { TempoSegment } from "../model/tempoSegment";
-import { ticksToSeconds } from "./ticksToSeconds";
+import type { TempoSegment } from "../model/tempoSegment.js";
+import { ticksToSeconds } from "./ticksToSeconds.js";
 
 /**
  * Converts tempo-change events into constant-tempo segments.

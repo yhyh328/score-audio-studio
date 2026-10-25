@@ -45,6 +45,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     endif()
 endif()
 
-if(BUILD_TESTING)
+if(
+    BUILD_TESTING
+    AND
+    CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR
+)
     add_subdirectory(tests)
 endif()

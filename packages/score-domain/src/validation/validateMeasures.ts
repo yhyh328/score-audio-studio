@@ -1,19 +1,19 @@
-import type { EntityId } from "../model/entityId";
-import type { Measure } from "../model/measure";
-import type { TimeSignature } from "../model/timeSignature";
-import type { ScoreEvent } from "../model/scoreEvent";
-import { calculateMeasureLengthTicks } from "../conversion/calculateMeasureLengthTicks";
-import { isPositiveInteger } from "./numberPredicates";
-import { validateScoreEvents } from "./validateScoreEvents";
+import type { EntityId } from "../model/entityId.js";
+import type { Measure } from "../model/measure.js";
+import type { TimeSignature } from "../model/timeSignature.js";
+import type { ScoreEvent } from "../model/scoreEvent.js";
+import { calculateMeasureLengthTicks } from "../conversion/calculateMeasureLengthTicks.js";
+import { isPositiveInteger } from "./numberPredicates.js";
+import { validateScoreEvents } from "./validateScoreEvents.js";
 import { isUniqueEntityId,
-         entityIdIssue } from "./validateUniqueEntityId";
-import { isValidTimeSignature } from "./isValidTimeSignature";						
-import type { ValidationIssue } from "./validationTypes";							
+entityIdIssue } from "./validateUniqueEntityId.js";
+import { isValidTimeSignature } from "./isValidTimeSignature.js";
+import type { ValidationIssue } from "./validationTypes.js";
 
 export function validateMeasures(
-    measures: readonly Measure[], 
+    measures: readonly Measure[],
     ppq: number | undefined,
-    path: string, 
+    path: string,
     usedEntityIds: Set<EntityId>
 ): ValidationIssue[] {
 
@@ -76,9 +76,9 @@ export function validateMeasures(
             usedMeasureNumbers.add(number);
             previousMeasureNumber = number;
         }
-        const timeSignature: TimeSignature = measure.timeSignature;	
+        const timeSignature: TimeSignature = measure.timeSignature;
         const numerator = timeSignature.numerator;
-        const denominator = timeSignature.denominator;							
+        const denominator = timeSignature.denominator;
         const hasValidTimeSignature = isValidTimeSignature(numerator, denominator);
         if (!hasValidTimeSignature) {
             issues.push({
@@ -96,9 +96,9 @@ export function validateMeasures(
                 : undefined;
         issues.push(
             ...validateScoreEvents(
-                events, 
+                events,
                 measureLengthTicks,
-                `${measurePath}.events`, 
+                `${measurePath}.events`,
                 usedEntityIds
             )
         );

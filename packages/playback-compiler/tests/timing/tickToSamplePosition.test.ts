@@ -57,7 +57,7 @@ describe("tickToSamplePosition", () => {
     ).toThrow("Sample rate must be a positive safe integer");
   });
 
-  it("accepts the largest safe sample position", () => {
+  it("accepts the largest uint32 sample position", () => {
     const ppq = 1;
     const segments = buildTempoSegments(ppq, [
       { tick: 0, bpm: 120 },
@@ -66,15 +66,15 @@ describe("tickToSamplePosition", () => {
     expect(
       tickToSamplePosition(
         createNoteEvent(2), // 1 second
-        Number.MAX_SAFE_INTEGER,
+        0xff_ff_ff_ff,
         ppq,
         segments,
         3,
       ),
-    ).toBe(Number.MAX_SAFE_INTEGER);
+    ).toBe(0xff_ff_ff_ff);
   });
 
-  it("throws when sample position exceeds the safe integer range", () => {
+  it("throws when sample position exceeds uint32 range", () => {
     const ppq = 1;
     const segments = buildTempoSegments(ppq, [
       { tick: 0, bpm: 120 },
@@ -82,12 +82,12 @@ describe("tickToSamplePosition", () => {
 
     expect(() =>
       tickToSamplePosition(
-        createNoteEvent(3), // 1.5 seconds
-        Number.MAX_SAFE_INTEGER,
+        createNoteEvent(2), // 1 seconds
+        0xff_ff_ff_ff + 0x01,
         ppq,
         segments,
         3,
       ),
-    ).toThrow("Sample position exceeds safe positive integer range");
+    ).toThrow("Sample position exceeds uint32 range");
   });
 });

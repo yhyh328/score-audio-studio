@@ -35,22 +35,27 @@ void AudioEngine::process(
     float* left,
     float* right,
     std::uint32_t frameCount,
-    const PlaybackEvent* events,
-    std::uint32_t eventCount
+    std::uint32_t blockStartFrame,
+    std::span<const PlaybackEvent> events
 ) noexcept
 {
+    std::size_t i = 0;
+    std::uint32_t sampleOffset;
 #ifndef NDEBUG
     assert(frameCount <= maxBlockSize_);
     assert(frameCount == 0 || (left != nullptr && right != nullptr));
-    assert(eventCount == 0 || events != nullptr);
-    if (0 < eventCount) {
-        assert(events[0].sampleOffset < frameCount);
-    }
-    for (std::size_t i = 1; i < eventCount; i++) {
-        std::uint32_t prevOffset = events[i - 1].sampleOffset;
-        std::uint32_t currOffset = events[i].sampleOffset;
-        assert(prevOffset <= currOffset);
-        assert(currOffset < frameCount);
+    for (i = 0; i < events.size(); i++) {
+        const PlaybackEvent& event = events[i];
+        assert(blockStartFrame <= event.samplePosition);
+        sampleOffset = event.samplePosition - blockStartFrame;
+        assert(sampleOffset < frameCount);
+        if (0 < i) {
+            assert(
+                events[i - 1].samplePosition
+                <=
+                event.samplePosition
+            );
+        }
     }
 #endif
     if (0 < frameCount) {

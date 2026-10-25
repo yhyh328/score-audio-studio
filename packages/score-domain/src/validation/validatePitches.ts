@@ -1,7 +1,7 @@
-import type { Pitch } from "../model/pitch";
-import { pitchToMidiNoteNumber } from "../conversion/pitchToMidiNoteNumber";
-import { isNonNegativeInteger } from "./numberPredicates";
-import type { ValidationIssue } from "./validationTypes";
+import type { Pitch } from "../model/pitch.js";
+import { pitchToMidiNoteNumber } from "../conversion/pitchToMidiNoteNumber.js";
+import { isNonNegativeInteger } from "./numberPredicates.js";
+import type { ValidationIssue } from "./validationTypes.js";
 
 /**
  * MIDI note numbers are encoded as 7-bit data values, so their range is

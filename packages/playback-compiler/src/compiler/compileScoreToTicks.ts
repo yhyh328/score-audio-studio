@@ -17,8 +17,8 @@ import {
     validateScoreDocument,
 } from "@score-audio-studio/score-domain";
 
-import type { TickPlaybackEvent } from "../model/playbackEvent";
-import { sortTickPlaybackEvents } from "./sortTickPlaybackEvents";
+import type { TickPlaybackEvent } from "../model/playbackEvent.js";
+import { sortTickPlaybackEvents } from "./sortTickPlaybackEvents.js";
 
 interface CompiledScoreTicks {
     events: TickPlaybackEvent[];

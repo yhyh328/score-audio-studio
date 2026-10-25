@@ -1,4 +1,4 @@
-import type { Pitch } from "../model/pitch";
+import type { Pitch } from "../model/pitch.js";
 
 const NATURAL_SEMITONE_BY_STEP = {
   C: 0,

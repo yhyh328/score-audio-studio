@@ -1,9 +1,9 @@
-import type { ScoreDocument } from "../model/score";
-import { validateParts } from "./validateParts";
-import { isValidPPQ } from "./isValidPPQ";
-import { isValidSchemaVersion } from "./validateSchemaVersion";
-import { validateTempoMap } from "./validateTempoMap";
-import type { ValidationIssue, ValidationResult } from "./validationTypes";
+import type { ScoreDocument } from "../model/score.js";
+import { validateParts } from "./validateParts.js";
+import { isValidPPQ } from "./isValidPPQ.js";
+import { isValidSchemaVersion } from "./validateSchemaVersion.js";
+import { validateTempoMap } from "./validateTempoMap.js";
+import type { ValidationIssue, ValidationResult } from "./validationTypes.js";
 
 export function validateScoreDocument(
   score: ScoreDocument,

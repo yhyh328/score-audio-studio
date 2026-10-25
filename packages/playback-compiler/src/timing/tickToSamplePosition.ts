@@ -1,12 +1,12 @@
-import type { TickPlaybackEvent } from "../model/playbackEvent";
+import type { TickPlaybackEvent } from "../model/playbackEvent.js";
 import {
     isNonNegativeInteger,
     isPositiveInteger
-} from "../utils/numberPredicates";
-import type { TempoSegment } from "../model/tempoSegment";
+} from "../utils/numberPredicates.js";
+import type { TempoSegment } from "../model/tempoSegment.js";
 import { 
     convertTickToAbsoluteSeconds 
-} from "./convertTickToAbsoluteSeconds";
+} from "./convertTickToAbsoluteSeconds.js";
 
 /**
  * Converts an event tick to the nearest discrete sample-frame position.
@@ -33,8 +33,12 @@ export function tickToSamplePosition(
         scoreEndTick,
     );
     const samplePosition = Math.round(seconds * sampleRate);
-    if (!isNonNegativeInteger(samplePosition)) {
-        throw new Error(`Sample position exceeds safe positive integer range: ${samplePosition}`);
+    if (
+        !isNonNegativeInteger(samplePosition)
+        ||
+        0xff_ff_ff_ff < samplePosition  // check samplePosition is 32 bits
+    ) {
+        throw new Error(`Sample position exceeds uint32 range: ${samplePosition}`);
     }
     return samplePosition;
 }
