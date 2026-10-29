@@ -162,10 +162,10 @@ void VoiceManager::reset() noexcept
 }  // VoiceManager::reset
 
 std::uint8_t VoiceManager::activeVoiceCount()
-noexcept
+const noexcept
 {
     std::uint8_t res = 0;
-    for (Voice& voice : voices_) {
+    for (const Voice& voice : voices_) {
         if (voice.isActive()) res++;
     }
     return res;

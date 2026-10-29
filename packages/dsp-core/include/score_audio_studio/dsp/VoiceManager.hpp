@@ -40,7 +40,7 @@ public:
     ) noexcept;
     void reset() noexcept;
     
-    [[nodiscard]] std::uint8_t activeVoiceCount() noexcept;
+    [[nodiscard]] std::uint8_t activeVoiceCount() const noexcept;
     
     bool isVoiceActive(
         const std::uint64_t voiceKey
