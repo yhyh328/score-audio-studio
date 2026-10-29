@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - phase-2-5-playback-runtime
+      - phase-3-dsp-core
 
   pull_request:
     branches:
