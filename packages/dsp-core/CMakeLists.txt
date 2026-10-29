@@ -6,11 +6,12 @@ include(CTest)
 
 add_library(score_audio_studio_dsp_core STATIC
     src/LibrarySmokeTest.cpp
-    src/AudioEngine.cpp
+    #src/AudioEngine.cpp
     src/Oscillator.cpp
     src/AdsrEnvelope.cpp
     src/Voice.cpp
     src/VoiceManager.cpp
+    src/Instruments.cpp
 )
 
 add_library(score_audio_studio::dsp_core
@@ -23,6 +24,16 @@ target_compile_features(score_audio_studio_dsp_core
 
 target_include_directories(score_audio_studio_dsp_core
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_compile_definitions(score_audio_studio_dsp_core
+    PRIVATE PROJECT_CONFIG_DIR="${CMAKE_CURRENT_SOURCE_DIR}/config"
+)
+
+find_package(nlohmann_json REQUIRED)
+
+target_link_libraries(score_audio_studio_dsp_core
+    PRIVATE nlohmann_json::nlohmann_json
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

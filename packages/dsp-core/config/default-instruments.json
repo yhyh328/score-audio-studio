@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "instrumentPresets": [
+    {
+      "id": "Violin",
+      "numVoices": 4,
+      "oscSettings": {
+          "waveType": "Sawtooth",
+          "numHarmonics": 8,
+          "allowAliasing": false
+      },
+      "adsrSettings": {
+          "attack": {
+          "seconds": 0.03,
+          "targetGain": 1.0
+          },
+          "decay": {
+          "seconds": 0.08,
+          "targetGain": 0.85
+          },
+          "sustainSeconds": 1.0,
+          "releaseSeconds": 0.15,
+          "curve": "Linear"
+          },
+      "defaultPan": 0.0,
+      "defaultLevel": 0.75
+    },
+    {
+      "id": "Viola",
+      "numVoices": 4,
+      "oscSettings": {
+          "waveType": "Sawtooth",
+          "numHarmonics": 7,
+          "allowAliasing": false
+      },
+      "adsrSettings": {
+          "attack": {
+          "seconds": 0.04,
+          "targetGain": 1.0
+          },
+          "decay": {
+          "seconds": 0.1,
+          "targetGain": 0.82
+          },
+          "sustainSeconds": 1.0,
+          "releaseSeconds": 0.18,
+          "curve": "Linear"
+      },
+      "defaultPan": 0.0,
+      "defaultLevel": 0.72
+    },
+    {
+      "id": "Violoncello",
+      "numVoices": 4,
+      "oscSettings": {
+          "waveType": "Sawtooth",
+          "numHarmonics": 6,
+          "allowAliasing": false
+      },
+      "adsrSettings": {
+          "attack": {
+          "seconds": 0.05,
+          "targetGain": 1.0
+          },
+          "decay": {
+          "seconds": 0.12,
+          "targetGain": 0.8
+          },
+          "sustainSeconds": 1.0,
+          "releaseSeconds": 0.22,
+          "curve": "Linear"
+      },
+      "defaultPan": 0.0,
+      "defaultLevel": 0.78
+    },
+    {
+      "id": "Acoustic-Grand-Piano",
+      "numVoices": 16,
+      "oscSettings": {
+          "waveType": "Triangle",
+          "numHarmonics": 6,
+          "allowAliasing": false
+      },
+      "adsrSettings": {
+          "attack": {
+          "seconds": 0.005,
+          "targetGain": 1.0
+          },
+          "decay": {
+          "seconds": 0.35,
+          "targetGain": 0.55
+          },
+          "sustainSeconds": 1.5,
+          "releaseSeconds": 0.35,
+          "curve": "Linear"
+      },
+      "defaultPan": 0.0,
+      "defaultLevel": 0.7
+    }
+  ]
+}
