@@ -18,6 +18,8 @@ public:
     void prepare(
         std::span<const std::uint8_t> buffer
     );
+    [[nodiscard]]
+    std::span<const PlaybackEvent> getEvents() noexcept;
     std::span<const PlaybackEvent> eventsForBlock(
         std::uint32_t blockStartFrame,
         std::uint32_t frameCount

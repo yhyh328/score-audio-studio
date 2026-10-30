@@ -80,6 +80,16 @@ int main()
         )
     );
 
+    const std::span<const PlaybackEvent> playbackEvents =
+        runtime.getEvents();
+
+    assert(9 <= playbackEvents.size());
+    for (std::size_t i = 0; i < 3; ++i) {
+        assert(playbackEvents[i].samplePosition == 0);
+    }
+    // tick / ppq * 60 / bpm * sampleRate = 24000
+    assert(playbackEvents[3].samplePosition == 24000);
+
     std::uint32_t frameCount = 512;
 
     // tick / ppq * 60 / bpm * sampleRate = 24000
@@ -96,6 +106,11 @@ int main()
         assert(0.0f <= event.velocity);
         assert(event.velocity <= 1.0f);
     }
+
+    const std::span<const PlaybackEvent> playbackEventsAfterFirstBlock =
+        runtime.getEvents();
+    assert(playbackEventsAfterFirstBlock.data() == playbackEvents.data());
+    assert(playbackEventsAfterFirstBlock.size() == playbackEvents.size());
 
     // The next fixture event after sample position 0 is at `blockStartFrame`,
     // so the range [1, 1 + frameCount) contains no events.
