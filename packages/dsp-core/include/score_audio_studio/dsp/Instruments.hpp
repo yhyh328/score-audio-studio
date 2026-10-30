@@ -11,7 +11,7 @@
 #include <string_view>
 #include <vector>
 
-#include "score_audio_studio/dsp/PlaybackEvent.hpp"
+#include "score_audio_studio/playback_runtime/PlaybackEvent.hpp"
 #include "score_audio_studio/dsp/VoiceManager.hpp"
 
 namespace score_audio_studio::dsp {
