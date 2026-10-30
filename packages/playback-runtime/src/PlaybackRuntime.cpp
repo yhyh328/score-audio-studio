@@ -121,6 +121,12 @@ void PlaybackRuntime::prepare(
     }
 }  // PlaybackRuntime::prepare
 
+std::span<const PlaybackEvent>PlaybackRuntime::getEvents()
+noexcept
+{
+    return playbackEvents_;
+}
+
 std::span<const PlaybackEvent>PlaybackRuntime::eventsForBlock(
     std::uint32_t blockStartFrame,
     std::uint32_t frameCount
