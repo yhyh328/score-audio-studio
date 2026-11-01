@@ -16,11 +16,6 @@
 
 namespace score_audio_studio::dsp {
 
-struct NoteVoiceMapping { // noteId - voiceKey
-    std::uint32_t noteId;
-    std::uint64_t voiceKey;
-};
-
 struct Instrument
 {
     std::string id;
@@ -35,7 +30,6 @@ struct Instrument
     float level;
     std::vector<float> scratchLeft;
     std::vector<float> scratchRight;
-    std::vector<NoteVoiceMapping> noteVoiceMappings;
 };
 
 bool isValidVal(
