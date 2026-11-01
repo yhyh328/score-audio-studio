@@ -38,6 +38,7 @@ public:
     ) noexcept;
     void noteOn(
         const std::uint64_t key,
+        const std::uint32_t noteId,
         const std::uint8_t midiNoteNumber,
         const float velocity
     ) noexcept;
@@ -54,6 +55,7 @@ public:
     [[nodiscard]] bool isReleasing() const noexcept;
     [[nodiscard]] float getLevel() const noexcept;
     [[nodiscard]] std::uint64_t getKey() const noexcept;
+    [[nodiscard]] std::uint32_t getNoteId() const noexcept;
 
 private:
     /**
@@ -63,6 +65,8 @@ private:
      * Key generation and voice allocation are managed by VoiceManager.
      */
     std::uint64_t key_{0};
+
+    std::uint32_t noteId_{0};
 
     Oscillator osc_;
     AdsrEnvelope adsr_;

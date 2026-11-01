@@ -42,6 +42,7 @@ void Voice::prepare(
 
 void Voice::noteOn(
     std::uint64_t key,
+    const std::uint32_t noteId,
     std::uint8_t midiNoteNumber,
     float velocity
 ) noexcept
@@ -52,6 +53,7 @@ void Voice::noteOn(
     }
     assert(0.0f <= velocity && velocity <= 1.0f);
     key_ = key;
+    noteId_ = noteId;
     velocity_ = velocity;
     osc_.setFrequency(midiNoteNumber);
     adsr_.noteOn();
@@ -100,6 +102,7 @@ void Voice::noteOff() noexcept
 void Voice::reset() noexcept
 {
     key_ = 0;
+    noteId_ = 0;
     velocity_ = 0.0f;
     osc_.reset();
     adsr_.reset();
@@ -126,5 +129,10 @@ std::uint64_t Voice::getKey() const noexcept
 {
     return key_;
 }  // Voice::getKey
+
+std::uint32_t Voice::getNoteId() const noexcept
+{
+    return noteId_;
+}  // Voice::getNoteId  
 
 }  // namespace

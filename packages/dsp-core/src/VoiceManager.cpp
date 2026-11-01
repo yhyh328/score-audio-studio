@@ -25,6 +25,7 @@ void VoiceManager::prepare(
 }  // VoiceManager::prepare
 
 std::uint64_t VoiceManager::noteOn(
+    const std::uint32_t noteId,
     const std::uint8_t midiNoteNumber,
     const float velocity
 ) noexcept
@@ -36,6 +37,7 @@ std::uint64_t VoiceManager::noteOn(
     Voice& voice = allocate();
     voice.noteOn(
         voiceKey_++,
+        noteId,
         midiNoteNumber,
         velocity
     );
@@ -127,10 +129,10 @@ void VoiceManager::render(
 }  // VoiceManager::render
 
 void VoiceManager::noteOff(
-    const std::uint64_t voiceKey
+    const std::uint32_t noteId
 ) noexcept
 {
-    Voice* voice = findVoice(voiceKey);
+    Voice* voice = findVoice(noteId);
     if (voice != nullptr) {
         assert
         (
@@ -143,11 +145,11 @@ void VoiceManager::noteOff(
 }  // VoiceManager::noteOff
 
 Voice* VoiceManager::findVoice(
-    const std::uint64_t voiceKey
+    const std::uint32_t noteId
 ) noexcept
 {
     for (Voice& voice : voices_) {
-        if (voice.getKey() == voiceKey) {
+        if (voice.getNoteId() == noteId) {
             return &voice;
         }
     }
@@ -172,10 +174,10 @@ const noexcept
 }  // VoiceManager::activeVoiceCount
 
 bool VoiceManager::isVoiceActive(
-    const std::uint64_t voiceKey
+    const std::uint32_t noteId
 ) noexcept
 {
-    Voice* voice = findVoice(voiceKey);
+    Voice* voice = findVoice(noteId);
     if (voice != nullptr && voice->isActive()) {
         return true;
     }

@@ -26,6 +26,7 @@ public:
      * required to match the corresponding noteOff()
      */
     std::uint64_t noteOn(
+        const std::uint32_t noteId,
         const std::uint8_t midiNoteNumber,
         const float velocity
     ) noexcept;
@@ -36,14 +37,14 @@ public:
         const std::uint32_t endFrame
     ) noexcept;
     void noteOff(
-        const std::uint64_t voiceKey
+        const std::uint32_t noteId
     ) noexcept;
     void reset() noexcept;
     
     [[nodiscard]] std::uint8_t activeVoiceCount() const noexcept;
     
     bool isVoiceActive(
-        const std::uint64_t voiceKey
+        const std::uint32_t noteId
     ) noexcept;
 
 private:
@@ -54,7 +55,7 @@ private:
 
     [[nodiscard]] Voice& allocate() noexcept;
     [[nodiscard]] Voice* findVoice(
-        const std::uint64_t voiceKey
+        const std::uint32_t noteId
     ) noexcept;
 };
 

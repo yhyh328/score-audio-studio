@@ -14,6 +14,7 @@ int main()
     constexpr float kVelocity = 1.0f;
 
     constexpr std::uint64_t voiceKeys[] = { 1, 2 };
+    constexpr std::uint32_t noteIds[]   = { 1, 2 };
 
     constexpr OscSettings oscSettings[] = {
         {
@@ -61,11 +62,15 @@ int main()
 
         voice.noteOn(
             voiceKeys[i],
+            noteIds[i],
             kMidiNoteNumber,
             kVelocity
         );
         // check if Voice reserves it's key without any changes
         assert(voice.getKey() == voiceKeys[i]);
+        
+        // check if Voice reserves it's noteId without any changes
+        assert(voice.getNoteId() == noteIds[i]);
 
         // Voice is active after noteOn()
         assert(voice.isActive() && !voice.isReleasing());

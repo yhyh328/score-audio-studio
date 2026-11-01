@@ -64,7 +64,11 @@ int main()
             kAdsrSettings
         );
         {// active  phase
-            voiceKey = manager.noteOn(69, kVelocity); // A4
+            voiceKey = manager.noteOn(
+                1,  // noteId
+                69, // A4
+                kVelocity
+            );
             // check that a valid voice key was issued
             assert(voiceKey != 0);
             manager.render(l, r, 0, kFrameCount);
@@ -78,7 +82,7 @@ int main()
             assert(hasNonZeroSample);
         }
         {// release phase
-            manager.noteOff(voiceKey);
+            manager.noteOff(1); // noteId
             const std::uint32_t releaseSamples =
                 static_cast<std::uint32_t>(
                     std::round(
@@ -120,7 +124,11 @@ int main()
             }
         }
         {// reset test
-            voiceKey = manager.noteOn(69, kVelocity);
+            voiceKey = manager.noteOn(
+                1,  // noteId
+                69, // A4
+                kVelocity
+            );
             assert(voiceKey != 0);
             manager.render(l, r, 0, kFrameCount);
             bool hasNonZeroSample = false;
@@ -148,6 +156,7 @@ int main()
         std::uint32_t firstFrameCount,
                       releaseSamples;
         std::array<std::uint64_t, kMaxVoices> voiceKeys{};
+        std::array<std::uint32_t, kMaxVoices> noteIds{};
         manager.prepare(
             kSampleRate,
             kMaxVoices,
@@ -157,13 +166,16 @@ int main()
         {// active  phase
             i = 0;
             while (i < kMaxVoices) {
-                // A4 to C6
                 voiceKey = manager.noteOn(
-                    midiNoteNumber++, kVelocity
+                    static_cast<std::uint32_t>(i + 1),  // noteId
+                    midiNoteNumber++,                   // A4 to C6
+                    kVelocity
                 );
                 // check that a valid voice key was issued
                 assert(voiceKey != 0);
-                voiceKeys[i++] = voiceKey;
+                voiceKeys[i] = voiceKey;
+                noteIds[i] = static_cast<std::uint32_t>(i + 1);
+                i++;
             }
             manager.render(l, r, 0, kFrameCount);
             bool hasNonZeroSample = false;
@@ -182,8 +194,8 @@ int main()
         {// release phase
             i = 0;
             while (i < kMaxVoices) {
-                voiceKey = voiceKeys[i++];
-                manager.noteOff(voiceKey);
+                std::uint32_t noteId = noteIds[i++];
+                manager.noteOff(noteId);
             }
             releaseSamples = static_cast<std::uint32_t>(
                 std::round(
@@ -231,6 +243,7 @@ int main()
                 // turn kMaxVoices - 1 inactive voices to active
                 while (i < kMaxVoices - 1) {
                     voiceKey = manager.noteOn( // C6
+                        static_cast<std::uint32_t>(i + 1),  // noteId
                         midiNoteNumber, kVelocity
                     );
                     // check that a valid voice key was issued
@@ -241,7 +254,11 @@ int main()
                 assert(manager.activeVoiceCount() == kMaxVoices - 1);
 
                 // turn the inactive voice to active
-                voiceKey = manager.noteOn(midiNoteNumber, kVelocity);
+                voiceKey = manager.noteOn(
+                    static_cast<std::uint32_t>(i + 1),  // noteId
+                    midiNoteNumber,
+                    kVelocity
+                );
                 assert(voiceKey != 0); // check that a valid voice key was issued
                 manager.render(l, r, 0, kFrameCount);
 
@@ -257,7 +274,9 @@ int main()
                 // turn all inactive voices to active
                 while (i < kMaxVoices) {
                     voiceKey = manager.noteOn( // C6
-                        midiNoteNumber, kVelocity
+                        static_cast<std::uint32_t>(i + 1),  // noteId
+                        midiNoteNumber,
+                        kVelocity
                     );
                     // check that a valid voice key was issued
                     assert(voiceKey != 0);
@@ -278,24 +297,27 @@ int main()
                     >
                     1e-12
                 );
+                std::uint32_t nextNoteId =
+                    static_cast<std::uint32_t>(kMaxVoices + 1);
                 for (i = 0; i < 4; i ++) {
                     if (i < 3) { // noteOff()
                         voiceKey = voiceKeys[i];
-                        assert(manager.isVoiceActive(voiceKey));
-                        manager.noteOff(voiceKey);
+                        assert(manager.isVoiceActive(noteIds[i]));
+                        manager.noteOff(noteIds[i]);
                         manager.render(l, r, 0, kFrameCount);
                     }
                     if (0 < i) { // noteOn()
-                        voiceLey = manager.noteOn(69, kVelocity); // A4
+                        voiceLey = manager.noteOn(nextNoteId, 69, kVelocity); // A4
                         // check that a valid voice key was issued
                         assert(voiceLey != 0);
                         // check that the key is not same with previous one
                         assert(voiceLey != voiceJey);
-                        // check a voice with the new key is active
-                        assert(manager.isVoiceActive(voiceLey));
-                        // check the preivous key is not active more
-                        assert(!manager.isVoiceActive(voiceJey));
+                        // check a voice with the new voice is active
+                        assert(manager.isVoiceActive(nextNoteId));
+                        // check the previous voice is not active more
+                        assert(!manager.isVoiceActive(noteIds[i - 1]));
                     }
+                    nextNoteId++;
                     voiceJey = voiceKey;
                 }
                 manager.reset();
@@ -306,6 +328,7 @@ int main()
                 // turn all inactive voices to active
                 while (i < kMaxVoices) {
                     voiceKey = manager.noteOn( // C6
+                        noteIds[i], // noteId
                         midiNoteNumber, kVelocity
                     );
                     // check that a valid voice key was issued
@@ -314,17 +337,28 @@ int main()
                 }
                 voiceJey = std::ranges::min(voiceKeys);
                 // this test calls no noteOff()
-                voiceLey = manager.noteOn(midiNoteNumber, kVelocity);
+                voiceLey = manager.noteOn(
+                    static_cast<std::uint32_t>(kMaxVoices + 1), // noteId
+                    midiNoteNumber, kVelocity
+                );
                 assert(voiceJey < voiceLey);
-                assert(!manager.isVoiceActive(voiceJey));
-                assert(manager.isVoiceActive(voiceLey));
+                assert(!manager.isVoiceActive(
+                    std::ranges::min(noteIds)
+                ));
+                assert(manager.isVoiceActive(
+                    static_cast<std::uint32_t>(kMaxVoices + 1)
+                ));
 
                 manager.reset();
                 clearBuffers(l, r);
             }
         }
         {// reset test
-            voiceKey = manager.noteOn(69, kVelocity);
+            voiceKey = manager.noteOn(
+                69,     // noteId
+                69,     // A4
+                kVelocity
+            );
             assert(voiceKey != 0);
             manager.render(l, r, 0, kFrameCount);
             bool hasNonZeroSample = false;
