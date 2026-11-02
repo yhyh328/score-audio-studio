@@ -1,19 +1,30 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <span>
+#include <vector>
 
-#include "score_audio_studio/dsp/PlaybackEvent.hpp"
+#include "score_audio_studio/playback_runtime/PlaybackEvent.hpp"
+#include "score_audio_studio/playback_runtime/PlaybackRuntime.hpp"
+#include "score_audio_studio/dsp/Instruments.hpp"
 
 namespace score_audio_studio::dsp {
 
 class AudioEngine {
 
+using PlaybackRuntime =
+    score_audio_studio::playback_runtime::PlaybackRuntime;
+
+using PlaybackEvent =
+    score_audio_studio::playback_runtime::PlaybackEvent;
+
 public:
     void prepare(
-        double sampleRate,
-        std::uint32_t maxBlockSize,
-        std::uint32_t maxVoices
+        const double sampleRate,
+        const std::uint32_t maxBlockSize,
+        const float masterGain,
+        const std::vector<std::uint8_t> buffer
     );
     void reset() noexcept;
     /**
@@ -35,9 +46,8 @@ public:
     void process(
         float* left,
         float* right,
-        std::uint32_t frameCount,
-        std::uint32_t blockStartFrame,
-        std::span<const PlaybackEvent> events
+        const std::uint32_t frameCount,
+        const std::uint32_t blockStartFrame
     ) noexcept;
 
 private:
@@ -46,14 +56,42 @@ private:
      */
     double sampleRate_;
     std::uint32_t maxBlockSize_;
-    std::uint32_t maxVoices_;
     /**
      * DSP processing components and persistent runtime state.
      */
+    PlaybackRuntime runtime_;
+    std::vector<Instrument*> instruments_{};
+    /**
+     * Runtime parameters that may change during playback.
+     */
+    float masterGain_{};
 #if 0 // TODO: Implement after the required voice, event, and effect components are available.
-    VoiceManager voiceManager_;
     EffectChain effectChain_;
 #endif
+    void setMasterGain(
+        const float masterGain
+    ) noexcept;
+    /**
+     * Preparation helpers.
+     */
+    void loadPlaybackEvents(
+        std::span<const std::uint8_t> buffer
+    );
+    void setInstruments(
+        const std::size_t channelSize
+    ) noexcept;
+    /**
+     * Audio processing helpers.
+     */
+    void renderVoices(
+        float* left,
+        float* right,
+        const std::uint32_t startFrame,
+        const std::uint32_t endFrame
+    ) noexcept;
+    void applyPlaybackEvent(
+        const PlaybackEvent& event
+    ) noexcept;
 };
 
 }  // namespace score_audio_studio::dsp

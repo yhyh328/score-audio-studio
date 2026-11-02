@@ -42,9 +42,16 @@ function(add_dsp_test target source)
 endfunction()
 
 #add_dsp_test(library_smoke_test LibrarySmokeTest.cpp)
-#add_dsp_test(audio_engine_test AudioEngineTest.cpp)
+add_dsp_test(audio_engine_test AudioEngineTest.cpp)
 add_dsp_test(oscillator_test OscillatorTest.cpp)
 add_dsp_test(adsr_envelope_test AdsrEnvelopeTest.cpp)
 add_dsp_test(voice_test VoiceTest.cpp)
 add_dsp_test(voice_manager_test VoiceManagerTest.cpp)
 add_dsp_test(instruments InstrumentsTest.cpp)
+
+set_tests_properties(
+    audio_engine_test
+    PROPERTIES
+        WORKING_DIRECTORY
+            "${CMAKE_CURRENT_SOURCE_DIR}"
+)

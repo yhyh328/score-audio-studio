@@ -25,9 +25,9 @@ Current Phase 3 progress:
 - [x] `Voice`
 - [x] `VoiceManager` and polyphony
 - [x] Phase 2.5 absolute-sample-position playback boundary
-- [ ] sample-accurate event dispatch inside `AudioEngine`
+- [x] sample-accurate event dispatch inside `AudioEngine`
 - [x] deterministic voice stealing
-- [ ] master gain
+- [x] master gain
 - [ ] low-pass filtering
 - [ ] soft clipping
 - [ ] delay
