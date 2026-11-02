@@ -5,7 +5,7 @@ project(score_audio_studio_dsp_core LANGUAGES CXX)
 include(CTest)
 
 add_library(score_audio_studio_dsp_core STATIC
-    src/LibrarySmokeTest.cpp
+    #src/LibrarySmokeTest.cpp
     #src/AudioEngine.cpp
     src/Oscillator.cpp
     src/AdsrEnvelope.cpp
@@ -30,10 +30,18 @@ target_compile_definitions(score_audio_studio_dsp_core
     PRIVATE PROJECT_CONFIG_DIR="${CMAKE_CURRENT_SOURCE_DIR}/config"
 )
 
+if(NOT TARGET score_audio_studio::playback_runtime)
+    add_subdirectory(
+        "${CMAKE_CURRENT_LIST_DIR}/../playback-runtime"
+        "${CMAKE_CURRENT_BINARY_DIR}/playback-runtime"
+    )
+endif()
+
 find_package(nlohmann_json REQUIRED)
 
 target_link_libraries(score_audio_studio_dsp_core
     PRIVATE nlohmann_json::nlohmann_json
+    PUBLIC score_audio_studio::playback_runtime
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

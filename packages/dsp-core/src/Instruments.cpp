@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "score_audio_studio/dsp/Instruments.hpp"
 
 namespace score_audio_studio::dsp {
@@ -8,21 +10,21 @@ bool isValidVal(
 ) noexcept
 {
     return (0 < val && val <= boundary);
-}
+}  // isValidVal
 
 bool isValidVal(
     const float val
 ) noexcept
 {
     return (0.0f <= val && val <= 1.0f);
-}
+}  // isValidVal
 
 bool isValidVal(
     const double val
 ) noexcept
 {
     return (0.0 <= val);
-}
+}  // isValidVal
 
 WaveType setWaveType(
     const std::string val
@@ -41,7 +43,7 @@ WaveType setWaveType(
         return WaveType::Sawtooth;
     }
     return WaveType::Sine;
-}
+}  // setWaveType
 
 EnvelopeCurve setCurve(
     const std::string val
@@ -57,13 +59,40 @@ EnvelopeCurve setCurve(
         return EnvelopeCurve::Exponential;
     }
     return EnvelopeCurve::None;
-}
+}  // setCurve
+
+Instrument::Instrument(
+    const InstSettings& preset,
+    const std::size_t channelSize,
+    const double sampleRate
+)
+: settings_(preset)
+{
+    settings_.voiceManager.prepare(
+        sampleRate,
+        settings_.numVoices,
+        settings_.oscSettings,
+        settings_.adsrSettings
+    );
+    settings_.scratchLeft.resize(channelSize);
+    settings_.scratchRight.resize(channelSize);
+    // pan will be applied later commit
+
+}  // Instrument::Instrument
+
+Instrument::~Instrument() {   
+}  // Instrument::~Instrument
+
+InstSettings& Instrument::getSettings() noexcept
+{
+    return settings_;
+}  // Instrument::getSettings
 
 namespace {
 
-const std::vector<Instrument> loadInstruments()
+const std::vector<InstSettings> loadInstruments()
 {
-    std::vector<Instrument> instruments;
+    std::vector<InstSettings> instruments;
 
     /**
      * [Default Instruments]
@@ -305,16 +334,16 @@ const std::vector<Instrument> loadInstruments()
                 }
 
 //////////////////////////////////////////////////////////////////
-                Instrument instrument;
-                instrument.id = item["id"].get<std::string>();
-                instrument.numVoices =
+                InstSettings preset;
+                preset.id = item["id"].get<std::string>();
+                preset.numVoices =
                     static_cast<std::size_t>(numVoices);
-                instrument.oscSettings = {
+                preset.oscSettings = {
                     .waveType = setWaveType(waveType),
                     .numHarmonics = static_cast<std::uint8_t>(numHarmonics),
                     .allowAliasing = allowAliasing
                 };
-                instrument.adsrSettings = {
+                preset.adsrSettings = {
                     .attack = {
                         .seconds = attackSeconds,
                         .targetGain = attackTargetGain
@@ -328,7 +357,7 @@ const std::vector<Instrument> loadInstruments()
                     .curve = setCurve(curve)
                 };
 
-                instruments.push_back(std::move(instrument));
+                instruments.push_back(std::move(preset));
             }
         }
         catch (const nlohmann::json::exception& e) {
@@ -342,6 +371,10 @@ const std::vector<Instrument> loadInstruments()
 
 } // namespace
 
-const std::vector<Instrument> instruments = loadInstruments();
+const std::vector<InstSettings>& getInstrumentPresets() {
+    static const std::vector<InstSettings> presets =
+        loadInstruments();
+    return presets;
+} // getInstrumentPresets
 
 } // namespace score_audio_studio::dsp
