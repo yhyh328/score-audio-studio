@@ -235,4 +235,14 @@ void AudioEngine::applyPlaybackEvent(
     }
 }  // AudioEngine::applyPlaybackEvent
 
+const double AudioEngine::getSampleRate() noexcept
+{
+    return sampleRate_;
+}  // AudioEngine::getSampleRate
+
+const std::uint32_t AudioEngine::getMaxBlockSize() noexcept
+{
+    return maxBlockSize_;
+}  // AudioEngine::getMaxBlockSize
+
 }  // namespace score_audio_studio::dsp

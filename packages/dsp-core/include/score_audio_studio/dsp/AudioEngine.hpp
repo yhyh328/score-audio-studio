@@ -50,6 +50,9 @@ public:
         const std::uint32_t blockStartFrame
     ) noexcept;
 
+    const double getSampleRate() noexcept;
+    const std::uint32_t getMaxBlockSize() noexcept;
+
 private:
     /**
      * Static engine configuration values that do not change during playback.
