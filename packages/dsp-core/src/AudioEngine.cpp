@@ -235,12 +235,12 @@ void AudioEngine::applyPlaybackEvent(
     }
 }  // AudioEngine::applyPlaybackEvent
 
-const double AudioEngine::getSampleRate() noexcept
+double AudioEngine::getSampleRate() const noexcept
 {
     return sampleRate_;
 }  // AudioEngine::getSampleRate
 
-const std::uint32_t AudioEngine::getMaxBlockSize() noexcept
+std::uint32_t AudioEngine::getMaxBlockSize() const noexcept
 {
     return maxBlockSize_;
 }  // AudioEngine::getMaxBlockSize

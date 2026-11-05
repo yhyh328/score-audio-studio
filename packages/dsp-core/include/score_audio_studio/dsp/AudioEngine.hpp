@@ -50,8 +50,8 @@ public:
         const std::uint32_t blockStartFrame
     ) noexcept;
 
-    const double getSampleRate() noexcept;
-    const std::uint32_t getMaxBlockSize() noexcept;
+    double getSampleRate() const noexcept;
+    std::uint32_t getMaxBlockSize() const noexcept;
 
 private:
     /**
