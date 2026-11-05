@@ -165,16 +165,19 @@ int main()
         );
         {// active  phase
             i = 0;
+            std::uint8_t numVoices;
+            const std::uint32_t noteId = 1;
             while (i < kMaxVoices) {
                 voiceKey = manager.noteOn(
-                    static_cast<std::uint32_t>(i + 1),  // noteId
+                    noteId,
                     midiNoteNumber++,                   // A4 to C6
                     kVelocity
                 );
                 // check that a valid voice key was issued
                 assert(voiceKey != 0);
+                // chord has one note ID and several voice keys
                 voiceKeys[i] = voiceKey;
-                noteIds[i] = static_cast<std::uint32_t>(i + 1);
+                noteIds[i] = 1;
                 i++;
             }
             manager.render(l, r, 0, kFrameCount);
@@ -185,6 +188,8 @@ int main()
                     break;
                 }
             }
+            numVoices = manager.activeVoiceCount();
+            assert(numVoices == kMaxVoices);
             assert(hasNonZeroSample);
             std::set<std::uint64_t> voiceKeysSet(
                 std::begin(voiceKeys), std::end(voiceKeys)
@@ -192,11 +197,9 @@ int main()
             assert(voiceKeysSet.size() == kMaxVoices);
         }
         {// release phase
-            i = 0;
-            while (i < kMaxVoices) {
-                std::uint32_t noteId = noteIds[i++];
-                manager.noteOff(noteId);
-            }
+            std::uint8_t numVoices;
+            const std::uint8_t noteId = 1;
+            manager.noteOff(noteId);
             releaseSamples = static_cast<std::uint32_t>(
                 std::round(
                     kSampleRate * kAdsrSettings.releaseSeconds
@@ -213,6 +216,8 @@ int main()
                         break;
                     }
                 }
+                numVoices = manager.activeVoiceCount();
+                assert(numVoices == kMaxVoices);
                 assert(hasNonZeroSample);
             }
             {// advance through the rest of the release stage
@@ -234,28 +239,32 @@ int main()
                     assert(l[i] == 0.0f);
                     assert(r[i] == 0.0f);
                 }
+                numVoices = manager.activeVoiceCount();
+                assert(numVoices == 0);
             }
             manager.reset();
         }
         {// maximum voice count is reached
+            std::uint32_t noteId1 = 1,
+                          noteId2 = 2;
             {// find an inactive voice
                 i = 0;
                 // turn kMaxVoices - 1 inactive voices to active
                 while (i < kMaxVoices - 1) {
                     voiceKey = manager.noteOn( // C6
-                        static_cast<std::uint32_t>(i + 1),  // noteId
+                        noteId1,
                         midiNoteNumber, kVelocity
                     );
                     // check that a valid voice key was issued
                     assert(voiceKey != 0);
-                    voiceKeys[i++] = voiceKey;
+                    ++i;
                 }
                 // count of inactive voices is one
                 assert(manager.activeVoiceCount() == kMaxVoices - 1);
 
                 // turn the inactive voice to active
                 voiceKey = manager.noteOn(
-                    static_cast<std::uint32_t>(i + 1),  // noteId
+                    noteId2,
                     midiNoteNumber,
                     kVelocity
                 );
@@ -280,7 +289,8 @@ int main()
                     );
                     // check that a valid voice key was issued
                     assert(voiceKey != 0);
-                    voiceKeys[i++] = voiceKey;
+                    noteIds[i] = static_cast<std::uint32_t>(i + 1);
+                    i++;
                 }
                 // all voices are active
                 assert(manager.activeVoiceCount() == kMaxVoices);
@@ -301,7 +311,6 @@ int main()
                     static_cast<std::uint32_t>(kMaxVoices + 1);
                 for (i = 0; i < 4; i ++) {
                     if (i < 3) { // noteOff()
-                        voiceKey = voiceKeys[i];
                         assert(manager.isVoiceActive(noteIds[i]));
                         manager.noteOff(noteIds[i]);
                         manager.render(l, r, 0, kFrameCount);
@@ -323,6 +332,10 @@ int main()
                 manager.reset();
                 clearBuffers(l, r);
             }
+/** SUSPENDED!!
+ * voice maanger doesn't use `voiceKey` for searching a voice.
+ */
+#if 0
             {// find the smallest key which means the oldest
                 i = 0;
                 // turn all inactive voices to active
@@ -352,6 +365,7 @@ int main()
                 manager.reset();
                 clearBuffers(l, r);
             }
+#endif
         }
         {// reset test
             voiceKey = manager.noteOn(

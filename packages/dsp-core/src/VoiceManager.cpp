@@ -132,8 +132,11 @@ void VoiceManager::noteOff(
     const std::uint32_t noteId
 ) noexcept
 {
-    Voice* voice = findVoice(noteId);
-    if (voice != nullptr) {
+    while (true) {
+        Voice* voice = findVoice(noteId);
+        if (voice == nullptr) {
+            break;
+        }
         assert
         (
             voice->isActive()
@@ -149,7 +152,13 @@ Voice* VoiceManager::findVoice(
 ) noexcept
 {
     for (Voice& voice : voices_) {
-        if (voice.getNoteId() == noteId) {
+        if (
+            voice.getNoteId() == noteId
+            &&
+            voice.isActive()
+            &&
+            !voice.isReleasing()
+        ) {
             return &voice;
         }
     }
