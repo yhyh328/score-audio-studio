@@ -34,7 +34,7 @@ Current Phase 3 progress:
 - [x] strict compiler warnings for native library and tests
 - [x] ASan/UBSan verification in Debug native tests
 - [ ] offline WAV verification through a separate native host
-- [ ] PortAudio realtime playback through a separate native host
+- [x] PortAudio realtime playback through a separate native host
 
 The DSP Core remains independent from `ScoreDocument`, TypeScript package internals, browser APIs, file I/O, and audio-device APIs.
 
@@ -246,6 +246,39 @@ The same DSP verification sequence is available through:
 ./tools/verify-dsp-core.sh
 ```
 
+### PortAudio realtime playback
+
+Install the PortAudio development package:
+
+```bash
+sudo apt install -y portaudio19-dev
+```
+
+Build the realtime playback host:
+
+```bash
+./tools/build-portaudio-player-app.sh
+```
+
+Run the player:
+
+```bash
+./tools/execute-portaudio-player-app.sh
+```
+
+Available commands:
+
+```text
+play   Start or resume playback.
+pause  Pause playback.
+stop   Stop playback.
+quit   Exit the application.
+```
+
+The PortAudio host is a separate verification application and is not part of the platform-independent DSP Core.
+
+[ PortAudio Player Status ](./apps/portaudio-player/portaudio-player-status.md)
+
 ## DSP-core design
 
 The current responsibility boundary is:
@@ -433,7 +466,8 @@ The initial CMake/CTest smoke test is an environment check and does not need to 
 
 ```text
 score-audio-studio/
-├── apps/                       # Future application packages
+├── apps/
+│   └── portaudio-player/
 ├── packages/
 │   ├── score-domain/           # Phase 1 domain model and validation
 │   ├── playback-compiler/      # Phase 2 playback compilation and timing
@@ -447,7 +481,7 @@ score-audio-studio/
 │   ├── Adsr-Envelope/
 │   ├── Oscillator/
 │   └── test-evidence/
-├── tools/                      # Verification and visualization utilities
+├── tools/                      # Verification, visualization and execution utilities
 ├── package.json
 ├── tsconfig.base.json
 ├── tsconfig.json

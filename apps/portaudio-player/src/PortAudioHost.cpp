@@ -7,6 +7,60 @@
 
 #include "PortAudioHost.hpp"
 
+PortAudioHost::PortAudioHost()
+{
+    const PaError err = Pa_Initialize();
+    if (err != paNoError) {
+        throw std::runtime_error(
+            "Failed to initialize PortAudio: "
+            +
+            std::string(Pa_GetErrorText(err))
+        );
+    }
+    PaDeviceIndex outputDevice = Pa_GetDefaultOutputDevice();
+    if (outputDevice == paNoDevice) {
+        throw std::runtime_error(
+            "No default output device found: "
+            +
+            std::string(Pa_GetErrorText(err))
+        );
+    }
+    const PaDeviceInfo* deviceInfo = Pa_GetDeviceInfo(outputDevice);
+    if (deviceInfo == nullptr) {
+        throw std::runtime_error(
+            "Failed to get device info: "
+            +
+            std::string(Pa_GetErrorText(err))
+        );
+    }
+    std::cout << "Using output device: " << deviceInfo->name << std::endl;
+    std::cout << "Max output channels: " << deviceInfo->maxOutputChannels << std::endl;
+
+    memset(&outputParams_, 0, sizeof(outputParams_));
+    outputParams_.device = outputDevice;
+    outputParams_.channelCount = numChannels_;
+    outputParams_.sampleFormat = paFloat32 | paNonInterleaved;
+    outputParams_.suggestedLatency =
+        Pa_GetDeviceInfo(outputParams_.device)->defaultLowOutputLatency;
+    outputParams_.hostApiSpecificStreamInfo = nullptr;
+
+    portaudioInitialized_ = true;
+}
+
+PortAudioHost::~PortAudioHost() noexcept
+{
+    if (stream_ != nullptr) {
+        if (Pa_IsStreamActive(stream_) == 1) {
+            Pa_StopStream(stream_);
+        }
+        Pa_CloseStream(stream_);
+        stream_ = nullptr;
+    }
+    if (portaudioInitialized_) {
+        Pa_Terminate();
+    }
+}
+
 void PortAudioHost::prepare(
     AudioEngine& engine,
     const double sampleRate,
@@ -31,68 +85,36 @@ void PortAudioHost::prepare(
 
 void PortAudioHost::play()
 {
-    if (stream_ != nullptr) {
-        throw std::runtime_error(
-            "Stream is already open."
-        );
-    }
-
     PaError err;
-    
-    err = Pa_Initialize();
-    if (err != paNoError) {
-        throw std::runtime_error(
-            "Failed to initialize PortAudio: "
-            +
-            std::string(Pa_GetErrorText(err))
-        );
+    if (stream_ != nullptr) {
+        if (!paused_) {
+            throw std::runtime_error(
+                "Stream is already playing."
+            );
+        }
+        err = Pa_StartStream(stream_);
+        if (err != paNoError) {
+            throw std::runtime_error(
+                "Failed to resume stream: "
+                +
+                std::string(Pa_GetErrorText(err))
+            );
+        }
+        paused_ = false;
+        return;
     }
-
-    portaudioInitialized_ = true;
-    
-    blockStartFrame_ = 0;
-
-    PaDeviceIndex outputDevice = Pa_GetDefaultOutputDevice();
-    if (outputDevice == paNoDevice) {
-        throw std::runtime_error(
-            "No default output device found: "
-            +
-            std::string(Pa_GetErrorText(err))
-        );
-    }
-    const PaDeviceInfo* deviceInfo = Pa_GetDeviceInfo(outputDevice);
-    if (deviceInfo == nullptr) {
-        throw std::runtime_error(
-            "Failed to get device info: "
-            +
-            std::string(Pa_GetErrorText(err))
-        );
-    }
-    std::cout << "Using output device: " << deviceInfo->name << std::endl;
-    std::cout << "Max output channels: " << deviceInfo->maxOutputChannels << std::endl;
-
-    PaStreamParameters outputParams;
-    memset(&outputParams, 0, sizeof(outputParams));
-    outputParams.device = outputDevice;
-    outputParams.channelCount = numChannels_;
-    outputParams.sampleFormat = paFloat32 | paNonInterleaved;
-    outputParams.suggestedLatency =
-        Pa_GetDeviceInfo(outputParams.device)->defaultLowOutputLatency;
-    outputParams.hostApiSpecificStreamInfo = nullptr;
-
     err = Pa_OpenStream(
-        &stream_, nullptr, &outputParams, engine_->getSampleRate(),
-        frameCount_, paNoFlag, &streamCallback, this
+        &stream_, nullptr, &outputParams_,
+        engine_->getSampleRate(), frameCount_,
+        paNoFlag, &streamCallback, this
     );
     if (err != paNoError) {
-        Pa_Terminate();
         throw std::runtime_error(
             "Failed to open stream: "
             +
             std::string(Pa_GetErrorText(err))
         );
     }
-
     err = Pa_StartStream(stream_);
     if (err != paNoError) {
         Pa_CloseStream(stream_);
@@ -123,7 +145,7 @@ int PortAudioHost::streamCallback(
     PortAudioHost* host = static_cast<PortAudioHost*>(userData);
 
     float** channels = static_cast<float**>(output);
-    
+
     float* left  = channels[0];
     float* right = channels[1];
 
@@ -142,43 +164,53 @@ int PortAudioHost::streamCallback(
     return paContinue;
 }  // PortAudioHost::paCallback
 
+void PortAudioHost::pause()
+{
+    if (stream_ == nullptr || paused_) {
+        return;
+    }
+    const PaError err = Pa_StopStream(stream_);
+    if (err != paNoError) {
+        throw std::runtime_error(
+            "Failed to puase stream: "
+            +
+            std::string(Pa_GetErrorText(err))
+        );
+    }
+    paused_ = true;
+}  // PortAudioHost::pause
+
 void PortAudioHost::stop()
 {
-    PaError activeError, closeError, stopError, terminateError;
-    PaError result = paNoError;
+    PaError err;
 
     if (stream_ != nullptr) {
-        activeError = Pa_IsStreamActive(stream_);
-        if (activeError == 1) {
-            stopError = Pa_StopStream(stream_);
-            if (stopError != paNoError) {
-                result = stopError;
+        err = Pa_IsStreamActive(stream_);
+        if (err == 1) {
+            err = Pa_StopStream(stream_);
+            if (err != paNoError) {
+                throw std::runtime_error(
+                    "Failed to stop stream"
+                    +
+                    std::string(Pa_GetErrorText(err))
+                );
             }
-        } else if (activeError < 0) {
-            result = activeError;
         }
-        closeError = Pa_CloseStream(stream_);
-    }
-
-    stream_ = nullptr;
-
-    if (result == paNoError && closeError != paNoError) {
-        result = closeError;
-    }
-
-    if (portaudioInitialized_) {
-        terminateError = Pa_Terminate();
-        portaudioInitialized_ = false;
-        if (result == paNoError && terminateError != paNoError) {
-            result = terminateError;
+        err = Pa_CloseStream(stream_);
+        stream_ = nullptr;
+        if (err != paNoError) {
+            throw std::runtime_error(
+                "Failed to close stream: "
+                +
+                std::string(Pa_GetErrorText(err))
+            );
         }
     }
 
-    if (result != paNoError) {
-        throw std::runtime_error(
-            "Failed to stop audio: "
-            +
-            std::string(Pa_GetErrorText(result))
-        );
+    paused_ = false;
+    blockStartFrame_ = 0;
+
+    if (engine_ != nullptr) {
+        engine_ -> rewind();
     }
 }  // PortAudioHost::stop
