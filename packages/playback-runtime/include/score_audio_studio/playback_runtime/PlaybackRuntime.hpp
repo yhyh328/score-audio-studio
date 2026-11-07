@@ -24,6 +24,7 @@ public:
         std::uint32_t blockStartFrame,
         std::uint32_t frameCount
     ) noexcept;
+    void rewind() noexcept;
 private:
     double sampleRate_{};
     std::vector<PlaybackEvent> playbackEvents_{};

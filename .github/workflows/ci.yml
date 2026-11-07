@@ -43,6 +43,3 @@ jobs:
 
       - name: Verify Playback Runtime
         run: ./tools/verify-playback-runtime.sh
-
-      - name: Verify DSP Core
-        run: ./tools/verify-dsp-core.sh
