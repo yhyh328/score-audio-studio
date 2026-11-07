@@ -170,4 +170,9 @@ std::span<const PlaybackEvent>PlaybackRuntime::eventsForBlock(
     );
 }  // PlaybackRuntime::eventsForBlock
 
+void PlaybackRuntime::rewind() noexcept
+{
+    nextEventIndex_ = 0;
+}  // PlaybackRuntime::rewind
+
 }  // namespace

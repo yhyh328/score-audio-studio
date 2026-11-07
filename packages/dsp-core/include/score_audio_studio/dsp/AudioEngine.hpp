@@ -50,6 +50,8 @@ public:
         const std::uint32_t blockStartFrame
     ) noexcept;
 
+    void rewind() noexcept;
+
     double getSampleRate() const noexcept;
     std::uint32_t getMaxBlockSize() const noexcept;
 

@@ -245,4 +245,12 @@ std::uint32_t AudioEngine::getMaxBlockSize() const noexcept
     return maxBlockSize_;
 }  // AudioEngine::getMaxBlockSize
 
+void AudioEngine::rewind() noexcept
+{
+    runtime_.rewind();
+    for (Instrument* instrument : instruments_) {
+        instrument->getSettings().voiceManager.reset();
+    }
+}  // AudioEngine::rewind
+
 }  // namespace score_audio_studio::dsp
