@@ -295,6 +295,8 @@ Run the renderer:
 
 [ WAV File List ](./apps/wav-renderer/wav-evidences/)
 
+[ WAV Renderer Status](./apps/wav-renderer/wav-renderer-status.md)
+
 ## DSP-core design
 
 The current responsibility boundary is:
