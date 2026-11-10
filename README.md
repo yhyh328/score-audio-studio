@@ -33,7 +33,7 @@ Current Phase 3 progress:
 - [ ] delay
 - [x] strict compiler warnings for native library and tests
 - [x] ASan/UBSan verification in Debug native tests
-- [ ] offline WAV verification through a separate native host
+- [x] offline WAV verification through a separate native host
 - [x] PortAudio realtime playback through a separate native host
 
 The DSP Core remains independent from `ScoreDocument`, TypeScript package internals, browser APIs, file I/O, and audio-device APIs.
@@ -278,6 +278,22 @@ quit   Exit the application.
 The PortAudio host is a separate verification application and is not part of the platform-independent DSP Core.
 
 [ PortAudio Player Status ](./apps/portaudio-player/portaudio-player-status.md)
+
+### WAV renderer
+
+Build the wav file randerer:
+
+```bash
+./tools/build-wav-renderer-app.sh
+```
+
+Run the renderer:
+
+```bash
+./tools/execute-wav-renderer-app.sh
+```
+
+[ WAV File List ](./apps/wav-renderer/wav-evidences/)
 
 ## DSP-core design
 
