@@ -297,6 +297,34 @@ Run the renderer:
 
 [ WAV Renderer Status](./apps/wav-renderer/wav-renderer-status.md)
 
+### DSP Playground
+
+The purpose of the `DSP Playground` is to provide an interactive environment for evaluating how different `AudioEngine` configurations affect audio quality and runtime behavior. It is intended to combine real-time PortAudio playback with offline WAV rendering so that results can be auditioned and compared.
+
+The playground is also intended to provide real-time waveform visualization with playback-event markers and PortAudio underrun diagnostics, making it easier to correlate audible artifacts with DSP events and streaming problems. Google Benchmark integration is planned to measure and compare DSP performance across different configurations.
+
+This is a development and verification tool, not the final application for this project.
+
+```bash
+sudo apt install -y libglfw3-dev libgl1-mesa-dev
+```
+
+Build DSP playground:
+
+```bash
+./tools/build-dsp-playground-app.sh
+```
+
+Execute DSP playground:
+
+```bash
+./tools/execute-dsp-playground-app.sh
+```
+
+Current app screen:
+
+![DSP Playground skeleton](./apps/dsp-playground/docs/dsp-playground.png)
+
 ## DSP-core design
 
 The current responsibility boundary is:
